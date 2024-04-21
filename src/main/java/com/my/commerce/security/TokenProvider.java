@@ -28,13 +28,11 @@ public class TokenProvider {
 
     // secret 값 가져와서 key 암호화
     public TokenProvider(@Value("${jwt.secret}") String secretKey) {
-        log.info("5656");
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public TokenDTO createAccessToken(Authentication authentication) {
-        log.info("5");
 
         // 권한 가져오기
         String authorities = authentication.getAuthorities().stream()
@@ -58,12 +56,11 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        log.info("6");
 
         Claims claims = getClaimsFromToken(token);
 
         if (claims.get("auth") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+            throw new BaseException(AUTHORITY_INVALID);
         }
 
         // 클레임에서 권한 정보 가져오기
@@ -103,8 +100,15 @@ public class TokenProvider {
         }
     }
 
-    public Date getExpiredTime(String token) {
-        return getClaimsFromToken(token).getExpiration();
+    public Long getExpiredTime(String token) {
+        Date expiration = Jwts.parser()
+                .setSigningKey(key)
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+
+        Long now = new Date().getTime();
+        return (expiration.getTime() - now);
     }
 
 

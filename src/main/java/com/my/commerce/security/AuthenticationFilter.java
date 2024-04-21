@@ -1,6 +1,8 @@
 package com.my.commerce.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.my.commerce.common.BaseException;
+import com.my.commerce.service.RedisUtilService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -15,23 +17,24 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
+import static com.my.commerce.common.BaseResponseStatus.*;
+
 @RequiredArgsConstructor
 public class AuthenticationFilter extends GenericFilterBean {
     private final TokenProvider tokenProvider;
+    private final RedisUtilService redisUtilService;
     private final AuthenticationManager authenticationManager;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         // 1. Request Header에서 JWT 토큰 추출
         String token = resolveToken((HttpServletRequest) request);
-        System.out.println("sfdgfdgfd");
         // 2. validateToken으로 토큰 유효성 검사
         if (token != null && tokenProvider.validateToken(token)) {
-            System.out.println("sfdfgdgfdgdgfdgfd");
-
-            Authentication authentication = tokenProvider.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            if(!redisUtilService.existData(token)) {
+                Authentication authentication = tokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
         chain.doFilter(request, response);
     }

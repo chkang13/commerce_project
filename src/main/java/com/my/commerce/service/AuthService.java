@@ -9,6 +9,7 @@ import com.my.commerce.domain.Member;
 import com.my.commerce.security.PostLoginReqDTO;
 import com.my.commerce.security.TokenDTO;
 import com.my.commerce.security.TokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
@@ -50,11 +51,8 @@ public class AuthService {
     public TokenDTO login(PostLoginReqDTO postLoginReqDTO) {
         UsernamePasswordAuthenticationToken authenticationToken
                 = new UsernamePasswordAuthenticationToken(postLoginReqDTO.getEmail(), postLoginReqDTO.getPassword());
-        log.info("2");
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        log.info("3");
         TokenDTO tokenDTO = tokenProvider.createAccessToken(authentication);
-        log.info("4");
         return tokenDTO;
     }
 
@@ -112,4 +110,15 @@ public class AuthService {
         }
     }
 
+    /**
+     * 로그아웃
+     */
+    @Transactional
+    public String logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        Long expiration = tokenProvider.getExpiredTime(token);
+        redisUtilService.setData(token, "logout", expiration);
+
+        return "로그아웃이 완료되었습니다.";
+    }
 }

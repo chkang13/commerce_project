@@ -31,7 +31,6 @@ public class AuthController {
     @PostMapping("/signup")
     public BaseResponse<String> signupMember(@RequestBody PostMemberReqDTO postMemberReqDTO) {
         String signupMemberRes = authService.signupMember(postMemberReqDTO);
-        log.info("signupMember 요청: " + signupMemberRes);
 
         return new BaseResponse<>(signupMemberRes);
     }
@@ -39,7 +38,6 @@ public class AuthController {
     @PostMapping("/login")
     public BaseResponse<TokenDTO> loginMember(@RequestBody PostLoginReqDTO postLoginReqDTO) {
         TokenDTO tokenDTO = authService.login(postLoginReqDTO);
-        log.info("1");
 
         return new BaseResponse<>(tokenDTO);
     }
@@ -70,11 +68,10 @@ public class AuthController {
 
 
     @PostMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        token = token.substring(7);
+    public BaseResponse<String> logout(HttpServletRequest request) {
+        String context= authService.logout(request);
 
-        return token;
+        return new BaseResponse<>(context);
     }
 
 }

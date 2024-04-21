@@ -1,5 +1,6 @@
 package com.my.commerce.security;
 
+import com.my.commerce.service.RedisUtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig{
     private final TokenProvider tokenProvider;
+    private final RedisUtilService redisUtilService;
     private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
@@ -43,7 +45,7 @@ public class SecurityConfig{
                                 .requestMatchers("/members/test").hasRole("USER")
                                 .anyRequest().authenticated())
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
-                .addFilterBefore(new AuthenticationFilter(tokenProvider, authenticationManager()), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new AuthenticationFilter(tokenProvider, redisUtilService, authenticationManager()), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
