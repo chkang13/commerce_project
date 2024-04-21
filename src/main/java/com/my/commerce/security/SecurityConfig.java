@@ -37,7 +37,9 @@ public class SecurityConfig{
                                 // 해당 API에 대해서는 모든 요청을 허가
                                 .requestMatchers("/auth/signup").permitAll()
                                 .requestMatchers("/auth/login").permitAll()
-                                // USER 권한이 있어야 요청할 수 있음
+                                .requestMatchers("/auth/email").permitAll()
+                                .requestMatchers("/auth/email/check").permitAll()
+                        // USER 권한이 있어야 요청할 수 있음
                                 .requestMatchers("/members/test").hasRole("USER")
                                 .anyRequest().authenticated())
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
