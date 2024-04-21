@@ -23,11 +23,11 @@ public class PostMemberReqDTO {
         this.address = address;
     }
 
-    public static Member toEntity(PostMemberReqDTO postMemberReqDTO) {
+    public static Member toEntity(PostMemberReqDTO postMemberReqDTO, String password) {
         return Member.builder()
                 .name(postMemberReqDTO.getName())
                 .email(postMemberReqDTO.getEmail())
-                .password(postMemberReqDTO.getPassword())
+                .password(password)
                 .phone(postMemberReqDTO.getPhone())
                 .address(postMemberReqDTO.getAddress())
                 .build();

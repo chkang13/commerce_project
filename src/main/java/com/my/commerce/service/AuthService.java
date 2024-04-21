@@ -18,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final JavaMailSender javaMailSender;
     private final RedisUtilService redisUtilService;
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     /**
@@ -40,7 +42,7 @@ public class AuthService {
      */
     @Transactional
     public String signupMember(PostMemberReqDTO postMemberReqDTO) {
-        Member member = postMemberReqDTO.toEntity(postMemberReqDTO);
+        Member member = postMemberReqDTO.toEntity(postMemberReqDTO,passwordEncoder.encode(postMemberReqDTO.getPassword()));
         member.addMemberRole("USER");
         memberRepository.save(member);
 
