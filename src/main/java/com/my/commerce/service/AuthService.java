@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Random;
 
 import static com.my.commerce.common.BaseResponseStatus.*;
@@ -51,8 +52,10 @@ public class AuthService {
 
     @Transactional
     public TokenDTO login(PostLoginReqDTO postLoginReqDTO) {
+        Optional<Member> member = memberRepository.findByEmail(postLoginReqDTO.getEmail());
+
         UsernamePasswordAuthenticationToken authenticationToken
-                = new UsernamePasswordAuthenticationToken(postLoginReqDTO.getEmail(), postLoginReqDTO.getPassword());
+                = new UsernamePasswordAuthenticationToken(member.get().getId(), postLoginReqDTO.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         TokenDTO tokenDTO = tokenProvider.createAccessToken(authentication);
         return tokenDTO;

@@ -31,7 +31,7 @@ public class MemberService {
      * 유저 정보 수정 API
      * */
     public String patchMember(Principal principal, PatchMemberReqDTO patchMemberReqDTO) {
-        Optional<Member> member = memberRepository.findByEmail(principal.getName());
+        Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
 
         // 유저 존재 여부 확인
         if (member.isPresent()) {
@@ -47,7 +47,7 @@ public class MemberService {
      * 유저 비밀번호 수정 API
      * */
     public String patchPassword(Principal principal, PatchPasswordReqDTO patchPasswordReqDTO) {
-        Optional<Member> member = memberRepository.findByEmail(principal.getName());
+        Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
 
         // 유저 존재 여부 확인
         if (member.isPresent()) {
