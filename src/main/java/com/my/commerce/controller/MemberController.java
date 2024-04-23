@@ -1,6 +1,7 @@
 package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
+import com.my.commerce.common.BasicException;
 import com.my.commerce.dto.PatchMemberReqDTO;
 import com.my.commerce.dto.PatchMemberReqDTO;
 import com.my.commerce.dto.PatchPasswordReqDTO;
@@ -28,7 +29,7 @@ public class MemberController {
      * @return String
      * */
     @PatchMapping
-    private BaseResponse<String> patchMember(Principal principal, @RequestBody PatchMemberReqDTO patchMemberReqDTO) {
+    private BaseResponse<String> patchMember(Principal principal, @RequestBody PatchMemberReqDTO patchMemberReqDTO) throws BasicException {
         String patchMemberRes = memberService.patchMember(principal, patchMemberReqDTO);
 
         return new BaseResponse<>(patchMemberRes);
@@ -40,7 +41,7 @@ public class MemberController {
      * @return String
      * */
     @PatchMapping("/password")
-    private BaseResponse<String> patchPassword(Principal principal, @RequestBody PatchPasswordReqDTO patchPasswordReqDTO) {
+    private BaseResponse<String> patchPassword(Principal principal, @RequestBody PatchPasswordReqDTO patchPasswordReqDTO) throws BasicException {
         String patchPasswordRes = memberService.patchPassword(principal, patchPasswordReqDTO);
 
         return new BaseResponse<>(patchPasswordRes);

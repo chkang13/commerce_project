@@ -2,6 +2,7 @@ package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
 
+import com.my.commerce.common.BasicException;
 import com.my.commerce.dto.PostEmailCheckReqDTO;
 import com.my.commerce.dto.PostEmailReqDTO;
 import com.my.commerce.dto.PostMemberReqDTO;
@@ -29,14 +30,14 @@ public class AuthController {
      * @return String
      */
     @PostMapping("/signup")
-    public BaseResponse<String> signupMember(@RequestBody PostMemberReqDTO postMemberReqDTO) {
+    public BaseResponse<String> signupMember(@RequestBody PostMemberReqDTO postMemberReqDTO) throws BasicException{
         String signupMemberRes = authService.signupMember(postMemberReqDTO);
 
         return new BaseResponse<>(signupMemberRes);
     }
 
     @PostMapping("/login")
-    public BaseResponse<TokenDTO> loginMember(@RequestBody PostLoginReqDTO postLoginReqDTO) {
+    public BaseResponse<TokenDTO> loginMember(@RequestBody PostLoginReqDTO postLoginReqDTO) throws BasicException{
         TokenDTO tokenDTO = authService.login(postLoginReqDTO);
 
         return new BaseResponse<>(tokenDTO);
@@ -48,7 +49,7 @@ public class AuthController {
      * @return String
      */
     @PostMapping("/email")
-    private BaseResponse<String> emailCheck(@RequestBody PostEmailReqDTO postEmailReqDTO) {
+    private BaseResponse<String> emailCheck(@RequestBody PostEmailReqDTO postEmailReqDTO) throws BasicException{
         String result = authService.emailCheck(postEmailReqDTO);
 
         return new BaseResponse<>(result);
@@ -60,7 +61,7 @@ public class AuthController {
      * @return String
      */
     @PostMapping("/email/check")
-    private BaseResponse<String> authCodeCheck(@RequestBody PostEmailCheckReqDTO postEmailCheckReqDTO) {
+    private BaseResponse<String> authCodeCheck(@RequestBody PostEmailCheckReqDTO postEmailCheckReqDTO) throws BasicException{
         String result = authService.authCodeCheck(postEmailCheckReqDTO);
 
         return new BaseResponse<>(result);
@@ -68,7 +69,7 @@ public class AuthController {
 
 
     @PostMapping("/logout")
-    public BaseResponse<String> logout(HttpServletRequest request) {
+    public BaseResponse<String> logout(HttpServletRequest request) throws BasicException{
         String context= authService.logout(request);
 
         return new BaseResponse<>(context);
