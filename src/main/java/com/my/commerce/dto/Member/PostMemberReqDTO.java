@@ -1,4 +1,4 @@
-package com.my.commerce.dto;
+package com.my.commerce.dto.Member;
 
 import com.my.commerce.domain.Member;
 import lombok.Builder;

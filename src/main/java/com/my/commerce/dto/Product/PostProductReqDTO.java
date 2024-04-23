@@ -1,6 +1,5 @@
-package com.my.commerce.dto;
+package com.my.commerce.dto.Product;
 
-import com.my.commerce.domain.Member;
 import com.my.commerce.domain.Product;
 import lombok.Builder;
 import lombok.Getter;

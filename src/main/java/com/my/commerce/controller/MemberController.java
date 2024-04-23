@@ -2,18 +2,13 @@ package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
 import com.my.commerce.common.BasicException;
-import com.my.commerce.dto.PatchMemberReqDTO;
-import com.my.commerce.dto.PatchMemberReqDTO;
-import com.my.commerce.dto.PatchPasswordReqDTO;
-import com.my.commerce.dto.PostEmailCheckReqDTO;
+import com.my.commerce.dto.Member.PatchMemberReqDTO;
+import com.my.commerce.dto.Member.PatchPasswordReqDTO;
 import com.my.commerce.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Member;
 import java.security.Principal;
 
 @Slf4j

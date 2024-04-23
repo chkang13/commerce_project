@@ -3,17 +3,15 @@ package com.my.commerce.controller;
 import com.my.commerce.common.BaseResponse;
 
 import com.my.commerce.common.BasicException;
-import com.my.commerce.dto.PostEmailCheckReqDTO;
-import com.my.commerce.dto.PostEmailReqDTO;
-import com.my.commerce.dto.PostMemberReqDTO;
+import com.my.commerce.dto.Member.PostEmailCheckReqDTO;
+import com.my.commerce.dto.Member.PostEmailReqDTO;
+import com.my.commerce.dto.Member.PostMemberReqDTO;
 import com.my.commerce.security.PostLoginReqDTO;
 import com.my.commerce.security.TokenDTO;
 import com.my.commerce.service.AuthService;
-import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j

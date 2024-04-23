@@ -4,14 +4,13 @@ package com.my.commerce.service;
 import com.my.commerce.common.BaseException;
 import com.my.commerce.common.BasicException;
 import com.my.commerce.domain.Member;
-import com.my.commerce.dto.PatchMemberReqDTO;
-import com.my.commerce.dto.PatchPasswordReqDTO;
+import com.my.commerce.dto.Member.PatchMemberReqDTO;
+import com.my.commerce.dto.Member.PatchPasswordReqDTO;
 import com.my.commerce.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 
