@@ -3,8 +3,12 @@ package com.my.commerce.service;
 import com.my.commerce.common.BaseException;
 import com.my.commerce.common.BasicException;
 import com.my.commerce.domain.*;
+import com.my.commerce.dto.Member.PatchMemberReqDTO;
 import com.my.commerce.dto.Order.PostOrderProductReqDTO;
 import com.my.commerce.dto.Order.PostOrderReqDTO;
+import com.my.commerce.dto.Product.GetProductResDTO;
+import com.my.commerce.dto.Wish.GetWishProductResDTO;
+import com.my.commerce.dto.Wish.PatchWishProductReqDTO;
 import com.my.commerce.dto.Wish.PostWishProductReqDTO;
 import com.my.commerce.repository.MemberRepository;
 import com.my.commerce.repository.ProductRepository;
@@ -17,10 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import static com.my.commerce.common.BaseResponseStatus.PRODUCT_INVALID_ID;
-import static com.my.commerce.common.BaseResponseStatus.SERVER_ERROR;
+import static com.my.commerce.common.BaseResponseStatus.*;
 
 @Slf4j
 @Service
@@ -49,6 +54,51 @@ public class WishService {
             }
 
             return "장바구니 추가가 완료되었습니다.";
+
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 장바구니 항목 수량 변경 API
+     * */
+    @Transactional
+    public String patchWishProduct(Principal principal, PatchWishProductReqDTO patchWishProductReqDTO) throws BasicException {
+        try {
+            Optional<WishProduct> wishProduct = wishProductRepository.findById(patchWishProductReqDTO.getWishProductId());
+            Optional<Product> product = productRepository.findById(wishProduct.get().getProduct().getId());
+
+            if (product.isPresent() && wishProduct.isPresent()) {
+                wishProduct.get().update(patchWishProductReqDTO.getCount());
+            }
+            else {
+                throw new BaseException(PRODUCT_INVALID_ID);
+            }
+
+            return "수량 변경이 완료되었습니다.";
+
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 장바구니 리스트 조회 API
+     */
+    public List<GetWishProductResDTO> getWishProducts(Principal principal) throws BasicException{
+        try {
+            Optional<Wish> wish = wishRepository.findByMemberId(Long.valueOf(principal.getName()));
+            List<WishProduct> wishProducts = wish.get().getWishProducts();
+
+            List<GetWishProductResDTO> getWishProductResDTOS = new ArrayList<>();
+
+            for (WishProduct wishProduct : wishProducts) {
+                int price = wishProduct.getProduct().getPrice() * wishProduct.getCount();
+                getWishProductResDTOS.add(GetWishProductResDTO.toDTO(wishProduct.getProduct(), wishProduct, price));
+            }
+
+            return  getWishProductResDTOS;
 
         } catch (Exception e) {
             throw new BasicException(SERVER_ERROR);

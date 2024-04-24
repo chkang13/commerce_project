@@ -34,4 +34,8 @@ public class WishProduct extends BaseEntity {
         this.product = product;
     }
 
+    public void update(int count) {
+        this.count = count;
+    }
+
 }
