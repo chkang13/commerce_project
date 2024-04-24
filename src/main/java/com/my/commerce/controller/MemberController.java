@@ -20,7 +20,8 @@ public class MemberController {
 
     /**
      * 유저 정보 수정 API
-     * @param patchMemberReqDTO
+     *
+     * @param patchMemberReqDTO 유저 정보
      * @return String
      * */
     @PatchMapping
@@ -32,7 +33,8 @@ public class MemberController {
 
     /**
      * 유저 비밀번호 수정 API
-     * @param patchPasswordReqDTO
+     *
+     * @param patchPasswordReqDTO 비밀번호 정보
      * @return String
      * */
     @PatchMapping("/password")

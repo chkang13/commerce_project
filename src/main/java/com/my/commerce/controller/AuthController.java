@@ -24,7 +24,7 @@ public class AuthController {
     /**
      * 회원가입 API
      *
-     * @param postMemberReqDTO 회원 정보 DTO
+     * @param postMemberReqDTO 회원 정보
      * @return String
      */
     @PostMapping("/signup")
@@ -34,6 +34,12 @@ public class AuthController {
         return new BaseResponse<>(signupMemberRes);
     }
 
+    /**
+     * 로그인 API
+     *
+     * @param postLoginReqDTO 로그인 정보
+     * @return TokenDTO 토큰 정보
+     */
     @PostMapping("/login")
     public BaseResponse<TokenDTO> loginMember(@RequestBody PostLoginReqDTO postLoginReqDTO) throws BasicException{
         TokenDTO tokenDTO = authService.login(postLoginReqDTO);
@@ -43,7 +49,8 @@ public class AuthController {
 
     /**
      * 메일 발송 API
-     * @param postEmailReqDTO
+     *
+     * @param postEmailReqDTO 이메일 정보
      * @return String
      */
     @PostMapping("/email")
@@ -55,7 +62,8 @@ public class AuthController {
 
     /**
      * 인증 번호 확인 API
-     * @param postEmailCheckReqDTO
+     *
+     * @param postEmailCheckReqDTO 인증 번호 정보
      * @return String
      */
     @PostMapping("/email/check")
@@ -65,7 +73,11 @@ public class AuthController {
         return new BaseResponse<>(result);
     }
 
-
+    /**
+     * 로그아웃 API
+     *
+     * @return String
+     */
     @PostMapping("/logout")
     public BaseResponse<String> logout(HttpServletRequest request) throws BasicException{
         String context= authService.logout(request);

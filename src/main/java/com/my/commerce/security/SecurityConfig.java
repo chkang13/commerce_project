@@ -41,6 +41,7 @@ public class SecurityConfig{
                                 .requestMatchers("/auth/login").permitAll()
                                 .requestMatchers("/auth/email").permitAll()
                                 .requestMatchers("/auth/email/check").permitAll()
+                                .requestMatchers("/products/**").permitAll()
                         // USER 권한이 있어야 요청할 수 있음
                                 .requestMatchers("/members/test").hasRole("USER")
                                 .anyRequest().authenticated())

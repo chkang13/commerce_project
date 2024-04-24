@@ -2,11 +2,13 @@ package com.my.commerce.service;
 
 import com.my.commerce.common.BaseException;
 import com.my.commerce.common.BasicException;
+import com.my.commerce.domain.Wish;
 import com.my.commerce.dto.Member.PostEmailCheckReqDTO;
 import com.my.commerce.dto.Member.PostEmailReqDTO;
 import com.my.commerce.dto.Member.PostMemberReqDTO;
 import com.my.commerce.repository.MemberRepository;
 import com.my.commerce.domain.Member;
+import com.my.commerce.repository.WishRepository;
 import com.my.commerce.security.PostLoginReqDTO;
 import com.my.commerce.security.TokenDTO;
 import com.my.commerce.security.TokenProvider;
@@ -32,6 +34,7 @@ import static com.my.commerce.common.BaseResponseStatus.*;
 @Service
 public class AuthService {
     private final MemberRepository memberRepository;
+    private final WishRepository wishRepository;
     private final TokenProvider tokenProvider;
     private final JavaMailSender javaMailSender;
     private final RedisUtilService redisUtilService;
@@ -48,6 +51,11 @@ public class AuthService {
             member.addMemberRole("USER");
             memberRepository.save(member);
 
+            Wish wish = Wish.builder()
+                    .member(member)
+                    .build();
+            wishRepository.save(wish);
+
             return "회원가입 성공하였습니다.";
 
         } catch (Exception e) {
@@ -55,6 +63,9 @@ public class AuthService {
         }
     }
 
+    /**
+     * 로그인 API
+     */
     @Transactional
     public TokenDTO login(PostLoginReqDTO postLoginReqDTO) throws BasicException {
         try {
@@ -117,7 +128,6 @@ public class AuthService {
     /**
      * 이메일 인증 코드 확인
      */
-    @Transactional
     public String authCodeCheck(PostEmailCheckReqDTO postEmailCheckReqDTO) throws BasicException {
         try {
             if (redisUtilService.existData(postEmailCheckReqDTO.getEmail())) {

@@ -22,7 +22,6 @@ import static com.my.commerce.common.BaseResponseStatus.*;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -30,6 +29,7 @@ public class MemberService {
     /**
      * 유저 정보 수정 API
      * */
+    @Transactional
     public String patchMember(Principal principal, PatchMemberReqDTO patchMemberReqDTO) throws BasicException {
         try {
             Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
@@ -51,6 +51,7 @@ public class MemberService {
     /**
      * 유저 비밀번호 수정 API
      * */
+    @Transactional
     public String patchPassword(Principal principal, PatchPasswordReqDTO patchPasswordReqDTO) throws BasicException {
         try {
             Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
