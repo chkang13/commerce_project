@@ -17,7 +17,11 @@ public enum BaseResponseStatus {
     EXPIRE_AUTH_CODE(false,483,"인증번호가 만료 되었습니다."),
     MEMBER_INVALID_USER(false, 600, "사용자가 존재하지 않습니다."),
     MEMBER_PASSWORD_DISCORD(false, 601, "비밀번호가 일치하지 않습니다."),
-    PRODUCT_INVALID_ID(false, 700, " 상품 아이디 값을 확인해주세요.");
+    PRODUCT_INVALID_ID(false, 700, " 상품 아이디 값을 확인해주세요."),
+    WISH_INVALID_ID(false, 800, " 장바구니 아이디 값을 확인해주세요."),
+    WISHPRODUCT_INVALID_ID(false, 801, " 장바구니 상품 아이디 값을 확인해주세요.");
+
+
 
 
 

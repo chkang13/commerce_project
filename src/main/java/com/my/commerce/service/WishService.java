@@ -42,11 +42,11 @@ public class WishService {
     @Transactional
     public String postWishProduct(Principal principal, PostWishProductReqDTO postWishProductReqDTO) throws BasicException {
         try {
-            Optional<Wish> wish = wishRepository.findByMemberId(Long.valueOf(principal.getName()));
-            Optional<Product> product = productRepository.findById(postWishProductReqDTO.getProductId());
+            Wish wish = wishRepository.findByMemberId(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
+            Product product = productRepository.findById(postWishProductReqDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
 
-            if (product.isPresent() && product.get().getStatus() == 1) {
-                WishProduct wishProduct = postWishProductReqDTO.toEntity(wish.get(), product.get(), postWishProductReqDTO.getCount());
+            if (product.getStatus() == 1) {
+                WishProduct wishProduct = postWishProductReqDTO.toEntity(wish, product, postWishProductReqDTO.getCount());
                 wishProductRepository.save(wishProduct);
             }
             else {
@@ -66,15 +66,10 @@ public class WishService {
     @Transactional
     public String patchWishProduct(Principal principal, PatchWishProductReqDTO patchWishProductReqDTO) throws BasicException {
         try {
-            Optional<WishProduct> wishProduct = wishProductRepository.findById(patchWishProductReqDTO.getWishProductId());
-            Optional<Product> product = productRepository.findById(wishProduct.get().getProduct().getId());
+            Wish wish = wishRepository.findByMemberId(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
+            WishProduct wishProduct = wishProductRepository.findById(patchWishProductReqDTO.getWishProductId()).orElseThrow(() -> new BaseException(WISHPRODUCT_INVALID_ID));
 
-            if (product.isPresent() && wishProduct.isPresent()) {
-                wishProduct.get().update(patchWishProductReqDTO.getCount());
-            }
-            else {
-                throw new BaseException(PRODUCT_INVALID_ID);
-            }
+            wishProduct.update(patchWishProductReqDTO.getCount());
 
             return "수량 변경이 완료되었습니다.";
 
@@ -88,8 +83,8 @@ public class WishService {
      */
     public List<GetWishProductResDTO> getWishProducts(Principal principal) throws BasicException{
         try {
-            Optional<Wish> wish = wishRepository.findByMemberId(Long.valueOf(principal.getName()));
-            List<WishProduct> wishProducts = wish.get().getWishProducts();
+            Wish wish = wishRepository.findByMemberId(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
+            List<WishProduct> wishProducts = wish.getWishProducts();
 
             List<GetWishProductResDTO> getWishProductResDTOS = new ArrayList<>();
 

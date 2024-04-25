@@ -68,10 +68,10 @@ public class ProductService {
      */
     public GetProductResDTO getProduct(Long productId) throws BasicException{
         try {
-            Optional<Product> product = productRepository.findById(productId);
+            Product product = productRepository.findById(productId).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
 
-            if (product.isPresent() && product.get().getStatus() == 1) {
-                GetProductResDTO getProductResDTO = GetProductResDTO.toDTO(product.get());
+            if (product.getStatus() == 1) {
+                GetProductResDTO getProductResDTO = GetProductResDTO.toDTO(product);
 
                 return getProductResDTO;
             } else {

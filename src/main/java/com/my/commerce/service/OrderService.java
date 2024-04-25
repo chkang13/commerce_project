@@ -46,9 +46,9 @@ public class OrderService {
 
             // 주문 상품 만들기
             for (PostOrderProductReqDTO postOrderProductReqDTO : postOrderReqDTO.getOrderProducts()) {
-                Optional<Product> product = productRepository.findById(postOrderProductReqDTO.getProductId());
-                if (product.isPresent() && product.get().getStatus() == 1) {
-                    OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, product.get(), postOrderProductReqDTO);
+                Product product = productRepository.findById(postOrderProductReqDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
+                if (product.getStatus() == 1) {
+                    OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, product, postOrderProductReqDTO);
                     orderProductRepository.save(orderProduct);
                 }
                 else {

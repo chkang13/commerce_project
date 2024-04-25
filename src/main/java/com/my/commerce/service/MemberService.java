@@ -32,15 +32,11 @@ public class MemberService {
     @Transactional
     public String patchMember(Principal principal, PatchMemberReqDTO patchMemberReqDTO) throws BasicException {
         try {
-            Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
+            Member member = memberRepository.findById(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
 
-            // 유저 존재 여부 확인
-            if (member.isPresent()) {
-                // 정보 수정
-                member.get().update(patchMemberReqDTO.getPhone(), patchMemberReqDTO.getAddress());
-            } else {
-                throw new BaseException(MEMBER_INVALID_USER);
-            }
+            // 정보 수정
+            member.update(patchMemberReqDTO.getPhone(), patchMemberReqDTO.getAddress());
+
             return "정보 수정 완료되었습니다.";
 
         } catch (Exception e) {
@@ -54,20 +50,16 @@ public class MemberService {
     @Transactional
     public String patchPassword(Principal principal, PatchPasswordReqDTO patchPasswordReqDTO) throws BasicException {
         try {
-            Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
+            Member member = memberRepository.findById(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
 
-            // 유저 존재 여부 확인
-            if (member.isPresent()) {
-                // 비밀번호 일치 여부 확인
-                if (!passwordEncoder.matches(patchPasswordReqDTO.getCurrentPassword(), member.get().getPassword())) {
-                    throw new BaseException(MEMBER_PASSWORD_DISCORD);
-                }
-
-                // 정보 수정
-                member.get().updatePassword(passwordEncoder.encode(patchPasswordReqDTO.getChangedPassword()));
-            } else {
-                throw new BaseException(MEMBER_INVALID_USER);
+            // 비밀번호 일치 여부 확인
+            if (!passwordEncoder.matches(patchPasswordReqDTO.getCurrentPassword(), member.getPassword())) {
+                throw new BaseException(MEMBER_PASSWORD_DISCORD);
             }
+
+            // 정보 수정
+            member.updatePassword(passwordEncoder.encode(patchPasswordReqDTO.getChangedPassword()));
+
             return "비밀번호 수정 완료되었습니다.";
 
         } catch (Exception e) {

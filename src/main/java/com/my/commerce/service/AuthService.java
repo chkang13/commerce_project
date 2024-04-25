@@ -69,10 +69,10 @@ public class AuthService {
     @Transactional
     public TokenDTO login(PostLoginReqDTO postLoginReqDTO) throws BasicException {
         try {
-            Optional<Member> member = memberRepository.findByEmail(postLoginReqDTO.getEmail());
+            Member member = memberRepository.findByEmail(postLoginReqDTO.getEmail()).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
 
             UsernamePasswordAuthenticationToken authenticationToken
-                    = new UsernamePasswordAuthenticationToken(member.get().getId(), postLoginReqDTO.getPassword());
+                    = new UsernamePasswordAuthenticationToken(member.getId(), postLoginReqDTO.getPassword());
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             TokenDTO tokenDTO = tokenProvider.createAccessToken(authentication);
             return tokenDTO;
