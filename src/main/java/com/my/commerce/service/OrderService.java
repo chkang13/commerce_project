@@ -4,6 +4,8 @@ import com.my.commerce.common.BaseException;
 import com.my.commerce.common.BasicException;
 import com.my.commerce.domain.*;
 import com.my.commerce.dto.Member.PostMemberReqDTO;
+import com.my.commerce.dto.Order.GetOrderProductResDTO;
+import com.my.commerce.dto.Order.GetOrderResDTO;
 import com.my.commerce.dto.Order.PostOrderProductReqDTO;
 import com.my.commerce.dto.Order.PostOrderReqDTO;
 import com.my.commerce.repository.MemberRepository;
@@ -17,10 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
-import static com.my.commerce.common.BaseResponseStatus.PRODUCT_INVALID_ID;
-import static com.my.commerce.common.BaseResponseStatus.SERVER_ERROR;
+import static com.my.commerce.common.BaseResponseStatus.*;
 
 @Slf4j
 @Service
@@ -57,6 +60,35 @@ public class OrderService {
             }
 
             return "주문이 완료되었습니다.";
+
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 주문 조회 API
+     */
+    public GetOrderResDTO getOrders(Principal principal, Long orderId) throws BasicException{
+        try {
+            Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
+            GetOrderResDTO getOrderResDTO;
+
+            if (order.getMember().getId() == Long.parseLong(principal.getName())) {
+                List<OrderProduct> orderProducts = order.getOrderProducts();
+                List<GetOrderProductResDTO> getOrderProductResDTOS = new ArrayList<>();
+
+                for (OrderProduct orderProduct : orderProducts) {
+                    getOrderProductResDTOS.add(GetOrderProductResDTO.toDTO(orderProduct, orderProduct.getProduct()));
+                }
+
+                getOrderResDTO = GetOrderResDTO.toDTO(order,getOrderProductResDTOS);
+            }
+            else {
+                throw new BaseException(AUTHORITY_INVALID);
+            }
+
+            return getOrderResDTO;
 
         } catch (Exception e) {
             throw new BasicException(SERVER_ERROR);

@@ -66,10 +66,15 @@ public class WishService {
     @Transactional
     public String patchWishProduct(Principal principal, PatchWishProductReqDTO patchWishProductReqDTO) throws BasicException {
         try {
-            Wish wish = wishRepository.findByMemberId(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
             WishProduct wishProduct = wishProductRepository.findById(patchWishProductReqDTO.getWishProductId()).orElseThrow(() -> new BaseException(WISHPRODUCT_INVALID_ID));
 
-            wishProduct.update(patchWishProductReqDTO.getCount());
+            // 권한 확인
+            if (wishProduct.getWish().getMember().getId() == Long.parseLong(principal.getName())){
+                wishProduct.update(patchWishProductReqDTO.getCount());
+            }
+            else {
+                throw new BaseException(AUTHORITY_INVALID);
+            }
 
             return "수량 변경이 완료되었습니다.";
 
