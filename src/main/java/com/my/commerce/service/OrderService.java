@@ -19,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -92,6 +95,28 @@ public class OrderService {
 
         } catch (Exception e) {
             throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 주문 상태 변경 API
+     */
+    public void updateStatus() {
+        List<Orders> orders = orderRepository.findAll();
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // 현재 시간
+        LocalDate currentDate = currentTime.toLocalDateTime().toLocalDate();
+
+        for (Orders order : orders) {
+            LocalDate orderDate = order.getCreatedAt().toLocalDateTime().toLocalDate();
+
+            // 날짜 차이
+            long daysDifference = orderDate.until(currentDate, ChronoUnit.DAYS);
+
+            if (daysDifference == 1) {
+                order.updateOrderStatus(OrderStatus.DELIVER);
+            } else if (daysDifference == 2) {
+                order.updateOrderStatus(OrderStatus.DELIVERED);
+            }
         }
     }
 
