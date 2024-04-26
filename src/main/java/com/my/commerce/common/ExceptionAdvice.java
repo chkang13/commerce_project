@@ -12,7 +12,7 @@ public class ExceptionAdvice {
         return new BaseResponse<>(e.getStatus());
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(BasicException.class)
     public BaseResponse<BaseResponseStatus> basicException(BasicException e) {
         return new BaseResponse<>(e.getStatus());
     }

@@ -1,7 +1,6 @@
 package com.my.commerce.service;
 
 import com.my.commerce.common.BaseException;
-import com.my.commerce.common.BasicException;
 import com.my.commerce.domain.Wish;
 import com.my.commerce.dto.Member.PostEmailCheckReqDTO;
 import com.my.commerce.dto.Member.PostEmailReqDTO;
@@ -24,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.Random;
 
 import static com.my.commerce.common.BaseResponseStatus.*;
@@ -45,70 +43,56 @@ public class AuthService {
      * 회원가입 API
      */
     @Transactional
-    public String signupMember(PostMemberReqDTO postMemberReqDTO) throws BasicException {
-        try {
-            Member member = postMemberReqDTO.toEntity(postMemberReqDTO,passwordEncoder.encode(postMemberReqDTO.getPassword()));
-            member.addMemberRole("USER");
-            memberRepository.save(member);
+    public String signupMember(PostMemberReqDTO postMemberReqDTO){
+        Member member = postMemberReqDTO.toEntity(postMemberReqDTO,passwordEncoder.encode(postMemberReqDTO.getPassword()));
+        member.addMemberRole("USER");
+        memberRepository.save(member);
 
-            Wish wish = Wish.builder()
-                    .member(member)
-                    .build();
-            wishRepository.save(wish);
+        Wish wish = Wish.builder()
+                .member(member)
+                .build();
+        wishRepository.save(wish);
 
-            return "회원가입 성공하였습니다.";
-
-        } catch (Exception e) {
-            throw new BasicException(SERVER_ERROR);
-        }
+        return "회원가입 성공하였습니다.";
     }
 
     /**
      * 로그인 API
      */
     @Transactional
-    public TokenDTO login(PostLoginReqDTO postLoginReqDTO) throws BasicException {
-        try {
-            Member member = memberRepository.findByEmail(postLoginReqDTO.getEmail()).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
+    public TokenDTO login(PostLoginReqDTO postLoginReqDTO) {
+        Member member = memberRepository.findByEmail(postLoginReqDTO.getEmail()).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
 
-            UsernamePasswordAuthenticationToken authenticationToken
-                    = new UsernamePasswordAuthenticationToken(member.getId(), postLoginReqDTO.getPassword());
-            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-            TokenDTO tokenDTO = tokenProvider.createAccessToken(authentication);
-            return tokenDTO;
+        UsernamePasswordAuthenticationToken authenticationToken
+                = new UsernamePasswordAuthenticationToken(member.getId(), postLoginReqDTO.getPassword());
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        TokenDTO tokenDTO = tokenProvider.createAccessToken(authentication);
 
-        } catch (Exception e) {
-            throw new BasicException(SERVER_ERROR);
-        }
+        return tokenDTO;
     }
 
     /**
      * 검증을 위한 이메일 발송 API
      */
     @Transactional
-    public String emailCheck(PostEmailReqDTO postEmailReqDTO) throws BasicException {
-        try {
-            // 이메일 존재 여부 확인
-            if (memberRepository.existsByEmail(postEmailReqDTO.getEmail())) {
-                throw new BaseException(EXIST_EMAIL_ERROR);
-            }
-
-            // 이메일 생성 및 발송
-            SimpleMailMessage message = new SimpleMailMessage();
-            String authCode = getAuthCode();
-            message.setTo(postEmailReqDTO.getEmail());
-            message.setSubject("커머스 서비스 이메일 인증코드");
-            message.setText("인증번호: " + authCode);
-            javaMailSender.send(message);
-
-            // Redis에 인증번호 저장 (3분)
-            redisUtilService.setData(postEmailReqDTO.getEmail(), authCode, 180000);
-
-            return "인증 메일이 발송되었습니다.";
-
-        } catch (Exception e) {
-            throw new BasicException(SERVER_ERROR);
+    public String emailCheck(PostEmailReqDTO postEmailReqDTO) {
+        // 이메일 존재 여부 확인
+        if (memberRepository.existsByEmail(postEmailReqDTO.getEmail())) {
+            throw new BaseException(EXIST_EMAIL_ERROR);
         }
+
+        // 이메일 생성 및 발송
+        SimpleMailMessage message = new SimpleMailMessage();
+        String authCode = getAuthCode();
+        message.setTo(postEmailReqDTO.getEmail());
+        message.setSubject("커머스 서비스 이메일 인증코드");
+        message.setText("인증번호: " + authCode);
+        javaMailSender.send(message);
+
+        // Redis에 인증번호 저장 (3분)
+        redisUtilService.setData(postEmailReqDTO.getEmail(), authCode, 180000);
+
+        return "인증 메일이 발송되었습니다.";
     }
 
     /**
@@ -128,20 +112,15 @@ public class AuthService {
     /**
      * 이메일 인증 코드 확인
      */
-    public String authCodeCheck(PostEmailCheckReqDTO postEmailCheckReqDTO) throws BasicException {
-        try {
-            if (redisUtilService.existData(postEmailCheckReqDTO.getEmail())) {
-                if (!redisUtilService.getData(postEmailCheckReqDTO.getEmail()).equals(postEmailCheckReqDTO.getAuthCode())) {
-                    throw new BaseException(INVALID_AUTH_CODE);
-                } else {
-                    return "이메일 인증 성공했습니다.";
-                }
+    public String authCodeCheck(PostEmailCheckReqDTO postEmailCheckReqDTO) {
+        if (redisUtilService.existData(postEmailCheckReqDTO.getEmail())) {
+            if (!redisUtilService.getData(postEmailCheckReqDTO.getEmail()).equals(postEmailCheckReqDTO.getAuthCode())) {
+                throw new BaseException(INVALID_AUTH_CODE);
             } else {
-                throw new BaseException(EXPIRE_AUTH_CODE);
+                return "이메일 인증 성공했습니다.";
             }
-
-        } catch (Exception e) {
-            throw new BasicException(SERVER_ERROR);
+        } else {
+            throw new BaseException(EXPIRE_AUTH_CODE);
         }
     }
 
@@ -149,16 +128,11 @@ public class AuthService {
      * 로그아웃
      */
     @Transactional
-    public String logout(HttpServletRequest request) throws BasicException{
-        try {
-            String token = request.getHeader("Authorization").substring(7);
-            Long expiration = tokenProvider.getExpiredTime(token);
-            redisUtilService.setData(token, "logout", expiration);
+    public String logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        Long expiration = tokenProvider.getExpiredTime(token);
+        redisUtilService.setData(token, "logout", expiration);
 
-            return "로그아웃이 완료되었습니다.";
-
-        } catch (Exception e) {
-            throw new BasicException(SERVER_ERROR);
-        }
+        return "로그아웃이 완료되었습니다.";
     }
 }

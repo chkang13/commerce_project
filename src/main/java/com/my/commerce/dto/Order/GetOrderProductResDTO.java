@@ -3,7 +3,6 @@ package com.my.commerce.dto.Order;
 
 import com.my.commerce.domain.OrderProduct;
 import com.my.commerce.domain.Product;
-import com.my.commerce.util.OrderStatus;
 import lombok.Builder;
 import lombok.Getter;
 

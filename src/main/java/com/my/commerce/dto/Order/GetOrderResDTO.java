@@ -2,15 +2,11 @@ package com.my.commerce.dto.Order;
 
 
 import com.my.commerce.domain.Orders;
-import com.my.commerce.domain.Product;
 import com.my.commerce.util.OrderStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Builder;
 import lombok.Getter;
-import org.aspectj.weaver.ast.Or;
-import org.hibernate.query.Order;
-
 import java.util.List;
 
 @Getter

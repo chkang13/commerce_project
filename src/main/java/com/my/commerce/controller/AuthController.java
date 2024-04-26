@@ -2,7 +2,6 @@ package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
 
-import com.my.commerce.common.BasicException;
 import com.my.commerce.dto.Member.PostEmailCheckReqDTO;
 import com.my.commerce.dto.Member.PostEmailReqDTO;
 import com.my.commerce.dto.Member.PostMemberReqDTO;
@@ -28,7 +27,7 @@ public class AuthController {
      * @return String
      */
     @PostMapping("/signup")
-    public BaseResponse<String> signupMember(@RequestBody PostMemberReqDTO postMemberReqDTO) throws BasicException{
+    public BaseResponse<String> signupMember(@RequestBody PostMemberReqDTO postMemberReqDTO) {
         String signupMemberRes = authService.signupMember(postMemberReqDTO);
 
         return new BaseResponse<>(signupMemberRes);
@@ -41,7 +40,7 @@ public class AuthController {
      * @return TokenDTO 토큰 정보
      */
     @PostMapping("/login")
-    public BaseResponse<TokenDTO> loginMember(@RequestBody PostLoginReqDTO postLoginReqDTO) throws BasicException{
+    public BaseResponse<TokenDTO> loginMember(@RequestBody PostLoginReqDTO postLoginReqDTO) {
         TokenDTO tokenDTO = authService.login(postLoginReqDTO);
 
         return new BaseResponse<>(tokenDTO);
@@ -54,7 +53,7 @@ public class AuthController {
      * @return String
      */
     @PostMapping("/email")
-    private BaseResponse<String> emailCheck(@RequestBody PostEmailReqDTO postEmailReqDTO) throws BasicException{
+    private BaseResponse<String> emailCheck(@RequestBody PostEmailReqDTO postEmailReqDTO) {
         String result = authService.emailCheck(postEmailReqDTO);
 
         return new BaseResponse<>(result);
@@ -67,7 +66,7 @@ public class AuthController {
      * @return String
      */
     @PostMapping("/email/check")
-    private BaseResponse<String> authCodeCheck(@RequestBody PostEmailCheckReqDTO postEmailCheckReqDTO) throws BasicException{
+    private BaseResponse<String> authCodeCheck(@RequestBody PostEmailCheckReqDTO postEmailCheckReqDTO) {
         String result = authService.authCodeCheck(postEmailCheckReqDTO);
 
         return new BaseResponse<>(result);
@@ -79,7 +78,7 @@ public class AuthController {
      * @return String
      */
     @PostMapping("/logout")
-    public BaseResponse<String> logout(HttpServletRequest request) throws BasicException{
+    public BaseResponse<String> logout(HttpServletRequest request) {
         String context= authService.logout(request);
 
         return new BaseResponse<>(context);

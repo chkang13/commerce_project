@@ -3,7 +3,6 @@ package com.my.commerce.security;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.Date;
 @Getter
 public class TokenDTO {
     private String grantType;

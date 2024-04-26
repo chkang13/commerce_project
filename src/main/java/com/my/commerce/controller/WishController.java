@@ -1,7 +1,6 @@
 package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
-import com.my.commerce.common.BasicException;
 import com.my.commerce.dto.Wish.GetWishProductResDTO;
 import com.my.commerce.dto.Wish.PatchWishProductReqDTO;
 import com.my.commerce.dto.Wish.PostWishProductReqDTO;
@@ -27,7 +26,7 @@ public class WishController {
      * @return String
      */
     @PostMapping
-    private BaseResponse<String> postWishProduct(Principal principal, @RequestBody PostWishProductReqDTO postWishProductReqDTO) throws BasicException {
+    private BaseResponse<String> postWishProduct(Principal principal, @RequestBody PostWishProductReqDTO postWishProductReqDTO) {
         String postWishProductRes = wishService.postWishProduct(principal, postWishProductReqDTO);
 
         return new BaseResponse<>(postWishProductRes);
@@ -39,7 +38,7 @@ public class WishController {
      * @return String
      */
     @PatchMapping()
-    private BaseResponse<String> patchWishProduct(Principal principal, @RequestBody PatchWishProductReqDTO patchWishProductReqDTO) throws BasicException {
+    private BaseResponse<String> patchWishProduct(Principal principal, @RequestBody PatchWishProductReqDTO patchWishProductReqDTO) {
         String patchWishProductRes = wishService.patchWishProduct(principal, patchWishProductReqDTO);
 
         return new BaseResponse<>(patchWishProductRes);
@@ -51,7 +50,7 @@ public class WishController {
      * @return List<GetWishProductResDTO>
      */
     @GetMapping
-    private BaseResponse<List<GetWishProductResDTO>> getWishProducts(Principal principal) throws BasicException {
+    private BaseResponse<List<GetWishProductResDTO>> getWishProducts(Principal principal) {
         List<GetWishProductResDTO> getWishProductResDTOS = wishService.getWishProducts(principal);
 
         return new BaseResponse<>(getWishProductResDTOS);

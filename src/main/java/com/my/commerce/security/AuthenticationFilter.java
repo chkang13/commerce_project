@@ -1,7 +1,5 @@
 package com.my.commerce.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.my.commerce.common.BaseException;
 import com.my.commerce.service.RedisUtilService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,7 +15,6 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-import static com.my.commerce.common.BaseResponseStatus.*;
 
 @RequiredArgsConstructor
 public class AuthenticationFilter extends GenericFilterBean {

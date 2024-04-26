@@ -1,6 +1,5 @@
 package com.my.commerce.domain;
 
-import com.my.commerce.util.OrderStatus;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

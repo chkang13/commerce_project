@@ -1,13 +1,10 @@
 package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
-import com.my.commerce.common.BasicException;
 import com.my.commerce.dto.Order.GetOrderResDTO;
 import com.my.commerce.dto.Order.GetOrdersResDTO;
 import com.my.commerce.dto.Order.PostOrderReqDTO;
-import com.my.commerce.dto.Product.GetProductResDTO;
 import com.my.commerce.service.OrderService;
-import com.my.commerce.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +26,7 @@ public class OrderController {
      * @return String
      */
     @PostMapping
-    private BaseResponse<String> postOrder(Principal principal, @RequestBody PostOrderReqDTO postOrderReqDTO) throws BasicException {
+    private BaseResponse<String> postOrder(Principal principal, @RequestBody PostOrderReqDTO postOrderReqDTO) {
         String postOrderRes = orderService.postOrder(principal, postOrderReqDTO);
 
         return new BaseResponse<>(postOrderRes);
@@ -42,7 +39,7 @@ public class OrderController {
      */
 
     @GetMapping()
-    public BaseResponse<List<GetOrdersResDTO>> getOrderList (Principal principal) throws BasicException {
+    public BaseResponse<List<GetOrdersResDTO>> getOrderList (Principal principal) {
         List<GetOrdersResDTO> getOrdersResDTOS = orderService.getOrderList(principal);
 
         return new BaseResponse<>(getOrdersResDTOS);
@@ -55,7 +52,7 @@ public class OrderController {
      * @param orderId 조회할 주문 아이디
      */
     @GetMapping("/{orderId}")
-    private BaseResponse<GetOrderResDTO> getOrders(Principal principal, @PathVariable("orderId") Long orderId) throws BasicException{
+    private BaseResponse<GetOrderResDTO> getOrders(Principal principal, @PathVariable("orderId") Long orderId) {
         GetOrderResDTO getOrderResDTO = orderService.getOrders(principal, orderId);
 
         return new BaseResponse<>(getOrderResDTO);
@@ -67,7 +64,7 @@ public class OrderController {
      * @param orderId 취소할 주문 아이디
      */
     @PatchMapping("/{orderId}")
-    private BaseResponse<String> cancelOrder (Principal principal, @PathVariable("orderId") Long orderId) throws BasicException {
+    private BaseResponse<String> cancelOrder (Principal principal, @PathVariable("orderId") Long orderId) {
         String cancelRes = orderService.cancelOrder(principal, orderId);
 
         return new BaseResponse<>(cancelRes);
@@ -79,7 +76,7 @@ public class OrderController {
      * @param orderId 반품할 주문 아이디
      */
     @PatchMapping("/refund/{orderId}")
-    private BaseResponse<String> refundOrder (Principal principal, @PathVariable("orderId") Long orderId) throws BasicException {
+    private BaseResponse<String> refundOrder (Principal principal, @PathVariable("orderId") Long orderId) {
         String refundRes = orderService.refundOrder(principal, orderId);
 
         return new BaseResponse<>(refundRes);

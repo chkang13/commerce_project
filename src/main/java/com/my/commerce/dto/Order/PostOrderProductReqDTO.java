@@ -1,6 +1,5 @@
 package com.my.commerce.dto.Order;
 
-import com.my.commerce.domain.Member;
 import com.my.commerce.domain.OrderProduct;
 import com.my.commerce.domain.Orders;
 import com.my.commerce.domain.Product;

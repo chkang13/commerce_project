@@ -1,8 +1,6 @@
 package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
-import com.my.commerce.common.BasicException;
-import com.my.commerce.dto.Member.PostMemberReqDTO;
 import com.my.commerce.dto.Product.GetProductResDTO;
 import com.my.commerce.dto.Product.PostProductReqDTO;
 import com.my.commerce.service.ProductService;
@@ -26,7 +24,7 @@ public class ProductController {
      * @return String
      */
     @PostMapping()
-    public BaseResponse<String> addProduct(@RequestBody PostProductReqDTO postProductReqDTO) throws BasicException {
+    public BaseResponse<String> addProduct(@RequestBody PostProductReqDTO postProductReqDTO) {
         String addProductRes = productService.addProduct(postProductReqDTO);
 
         return new BaseResponse<>(addProductRes);
@@ -38,7 +36,7 @@ public class ProductController {
      * @return List<GetProductResDTO>
      */
     @GetMapping()
-    public BaseResponse<List<GetProductResDTO>> getProductList () throws BasicException {
+    public BaseResponse<List<GetProductResDTO>> getProductList () {
         List<GetProductResDTO> getProductResDTOS = productService.getProductList();
 
         return new BaseResponse<>(getProductResDTOS);
@@ -51,7 +49,7 @@ public class ProductController {
      * @return GetProductResDTO
      */
     @GetMapping("/{productId}")
-    public BaseResponse<GetProductResDTO> getProduct (@PathVariable("productId") Long productId) throws BasicException {
+    public BaseResponse<GetProductResDTO> getProduct (@PathVariable("productId") Long productId) {
         GetProductResDTO getProductResDTO = productService.getProduct(productId);
 
         return new BaseResponse<>(getProductResDTO);
