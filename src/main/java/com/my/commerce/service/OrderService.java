@@ -4,18 +4,18 @@ import com.my.commerce.common.BaseException;
 import com.my.commerce.common.BasicException;
 import com.my.commerce.domain.*;
 import com.my.commerce.dto.Member.PostMemberReqDTO;
-import com.my.commerce.dto.Order.GetOrderProductResDTO;
-import com.my.commerce.dto.Order.GetOrderResDTO;
-import com.my.commerce.dto.Order.PostOrderProductReqDTO;
-import com.my.commerce.dto.Order.PostOrderReqDTO;
+import com.my.commerce.dto.Order.*;
+import com.my.commerce.dto.Product.GetProductResDTO;
 import com.my.commerce.repository.MemberRepository;
 import com.my.commerce.repository.OrderProductRepository;
 import com.my.commerce.repository.OrderRepository;
 import com.my.commerce.repository.ProductRepository;
 import com.my.commerce.util.OrderStatus;
+import jakarta.persistence.Basic;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -56,6 +56,9 @@ public class OrderService {
                 if (product.getStatus() == 1) {
                     OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, product, postOrderProductReqDTO);
                     orderProductRepository.save(orderProduct);
+
+                    // 재고 줄이기
+                    product.updateStock(product.getStock() - postOrderProductReqDTO.getCount());
                 }
                 else {
                     throw new BaseException(PRODUCT_INVALID_ID);
@@ -63,6 +66,25 @@ public class OrderService {
             }
 
             return "주문이 완료되었습니다.";
+
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 주문 리스트 조회 API
+     */
+    public List<GetOrdersResDTO> getOrderList(Principal principal) throws BasicException{
+        try {
+            List<GetOrdersResDTO> getOrdersResDTOS = new ArrayList<>();
+            List<Orders> orders = orderRepository.findByMemberId(Long.parseLong(principal.getName()));
+
+            for (Orders order : orders) {
+                getOrdersResDTOS.add(GetOrdersResDTO.toDTO(order));
+            }
+
+            return  getOrdersResDTOS;
 
         } catch (Exception e) {
             throw new BasicException(SERVER_ERROR);
@@ -85,7 +107,7 @@ public class OrderService {
                     getOrderProductResDTOS.add(GetOrderProductResDTO.toDTO(orderProduct, orderProduct.getProduct()));
                 }
 
-                getOrderResDTO = GetOrderResDTO.toDTO(order,getOrderProductResDTOS);
+                getOrderResDTO = GetOrderResDTO.toDTO(order, getOrderProductResDTOS);
             }
             else {
                 throw new BaseException(AUTHORITY_INVALID);
@@ -101,23 +123,118 @@ public class OrderService {
     /**
      * 주문 상태 변경 API
      */
-    public void updateStatus() {
-        List<Orders> orders = orderRepository.findAll();
-        Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // 현재 시간
-        LocalDate currentDate = currentTime.toLocalDateTime().toLocalDate();
+    @Transactional
+    public void updateStatus() throws BasicException {
+        try {
+            List<Orders> orders = orderRepository.findAll();
+            Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // 현재 시간
+            LocalDate currentDate = currentTime.toLocalDateTime().toLocalDate();
 
-        for (Orders order : orders) {
-            LocalDate orderDate = order.getCreatedAt().toLocalDateTime().toLocalDate();
+            for (Orders order : orders) {
+                LocalDate orderDate = order.getCreatedAt().toLocalDateTime().toLocalDate();
 
-            // 날짜 차이
-            long daysDifference = orderDate.until(currentDate, ChronoUnit.DAYS);
+                // 날짜 차이
+                long daysDifference = orderDate.until(currentDate, ChronoUnit.DAYS);
 
-            if (daysDifference == 1) {
-                order.updateOrderStatus(OrderStatus.DELIVER);
-            } else if (daysDifference == 2) {
-                order.updateOrderStatus(OrderStatus.DELIVERED);
+                if (daysDifference == 1) {
+                    order.updateOrderStatus(OrderStatus.DELIVER);
+                } else if (daysDifference == 2) {
+                    order.updateOrderStatus(OrderStatus.DELIVERED);
+                }
             }
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
         }
     }
+
+    /**
+     * 주문 취소 API
+     */
+    @Transactional
+    public String cancelOrder (Principal principal, Long orderId) throws BasicException{
+        try {
+            Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
+
+            if (order.getMember().getId() == Long.parseLong(principal.getName())) {
+                // 배송중 이전까지만
+                if (order.getStatus().equals(OrderStatus.ORDERED)) {
+                    for (OrderProduct orderProduct : order.getOrderProducts()) {
+                        // 재고 늘리기
+                        orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                    }
+                }
+                else {
+                    throw new BaseException(ORDER_INVALID_CANCEL);
+                }
+            }
+            else {
+                throw new BaseException(AUTHORITY_INVALID);
+            }
+
+            order.updateOrderStatus(OrderStatus.CANCELED);
+            return "주문 취소되었습니다.";
+
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 주문 반품 신청 API
+     */
+    @Transactional
+    public String refundOrder (Principal principal, Long orderId) throws BasicException{
+        try {
+            Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
+
+            if (order.getMember().getId() == Long.parseLong(principal.getName())) {
+                Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // 현재 시간
+                LocalDate currentDate = currentTime.toLocalDateTime().toLocalDate();
+
+                LocalDate orderDate = order.getCreatedAt().toLocalDateTime().toLocalDate();
+                long daysDifference = orderDate.until(currentDate, ChronoUnit.DAYS);
+
+                // 배송완료 후 1일 후가 지나면 반품 불가
+                if (daysDifference <= 3 && order.getStatus().equals(OrderStatus.DELIVERED)) {
+                    order.updateOrderStatus(OrderStatus.REFUND);
+                } else {
+                    throw new BaseException(ORDER_INVALID_REFUND);
+                }
+            }
+            else {
+                throw new BaseException(AUTHORITY_INVALID);
+            }
+
+            return "반품 신청 되었습니다.";
+
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 주문 반품 처리 API
+     */
+    @Transactional
+    public void updateRefund() throws BasicException {
+        try {
+            List<Orders> orders = orderRepository.findAll();
+
+            for (Orders order : orders) {
+                if (order.getStatus().equals(OrderStatus.REFUND)) {
+                    // 재고 늘리기
+                    for (OrderProduct orderProduct : order.getOrderProducts()) {
+                        orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                    }
+
+                    order.updateOrderStatus(OrderStatus.REFUNDED);
+                }
+            }
+        } catch (Exception e) {
+            throw new BasicException(SERVER_ERROR);
+        }
+    }
+
+
 
 }

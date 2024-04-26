@@ -1,5 +1,5 @@
 package com.my.commerce.util;
 
 public enum OrderStatus {
-    ORDERED, DELIVER, DELIVERED, REFUNDED, CANCELED
+    ORDERED, DELIVER, DELIVERED, REFUND, REFUNDED, CANCELED
 }

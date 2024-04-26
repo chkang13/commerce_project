@@ -10,6 +10,5 @@ import java.util.Optional;
 
 @Repository
 public interface WishProductRepository extends JpaRepository<WishProduct, Long> {
-    List<WishProduct> findByWishId(Long wishId);
 
 }

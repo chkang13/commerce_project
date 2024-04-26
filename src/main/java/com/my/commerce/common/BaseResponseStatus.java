@@ -20,9 +20,9 @@ public enum BaseResponseStatus {
     PRODUCT_INVALID_ID(false, 700, " 상품 아이디 값을 확인해주세요."),
     WISH_INVALID_ID(false, 800, " 장바구니 아이디 값을 확인해주세요."),
     WISHPRODUCT_INVALID_ID(false, 801, " 장바구니 상품 아이디 값을 확인해주세요."),
-    ORDER_INVALID_ID(false, 900, " 주문 아이디 값을 확인해주세요.");
-
-
+    ORDER_INVALID_ID(false, 900, " 주문 아이디 값을 확인해주세요."),
+    ORDER_INVALID_CANCEL(false, 901, " 주문 취소가 불가능 합니다."),
+    ORDER_INVALID_REFUND(false, 902, " 주문 반품이 불가능 합니다.");
 
 
 

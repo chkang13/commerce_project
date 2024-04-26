@@ -1,5 +1,6 @@
 package com.my.commerce.domain;
 
+import com.my.commerce.util.OrderStatus;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,4 +38,9 @@ public class Product extends BaseEntity {
         this.status = status;
         this.stock = stock;
     }
+
+    public void updateStock(int stock) {
+        this.stock = stock;
+    }
+
 }
