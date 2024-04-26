@@ -45,6 +45,18 @@ public class WishController {
     }
 
     /**
+     * 장바구니 항목 삭제 API
+     *
+     * @return String
+     */
+    @DeleteMapping("/{wishProductId}")
+    private BaseResponse<String> deleteWishProduct(Principal principal, @PathVariable("wishProductId") Long wishProductId) {
+        String deleteWishProductRes = wishService.deleteWishProduct(principal, wishProductId);
+
+        return new BaseResponse<>(deleteWishProductRes);
+    }
+
+    /**
      * 장바구니 리스트 조회 API
      *
      * @return List<GetWishProductResDTO>

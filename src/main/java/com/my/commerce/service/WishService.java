@@ -66,6 +66,24 @@ public class WishService {
     }
 
     /**
+     * 장바구니 항목 삭제 API
+     * */
+    @Transactional
+    public String deleteWishProduct(Principal principal, Long wishProductId) {
+        WishProduct wishProduct = wishProductRepository.findById(wishProductId).orElseThrow(() -> new BaseException(WISHPRODUCT_INVALID_ID));
+
+        // 권한 확인
+        if (wishProduct.getWish().getMember().getId() == Long.parseLong(principal.getName())){
+            wishProductRepository.deleteById(wishProductId);
+        }
+        else {
+            throw new BaseException(AUTHORITY_INVALID);
+        }
+
+        return "장바구니 항목 삭제가 완료되었습니다.";
+    }
+
+    /**
      * 장바구니 리스트 조회 API
      */
     public List<GetWishProductResDTO> getWishProducts(Principal principal) {
