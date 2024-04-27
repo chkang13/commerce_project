@@ -1,9 +1,12 @@
 package com.my.commerce.controller;
 
 import com.my.commerce.common.BaseResponse;
+import com.my.commerce.dto.Order.PostOrderReqDTO;
 import com.my.commerce.dto.Wish.GetWishProductResDTO;
 import com.my.commerce.dto.Wish.PatchWishProductReqDTO;
+import com.my.commerce.dto.Wish.PostWishOrderReqDTO;
 import com.my.commerce.dto.Wish.PostWishProductReqDTO;
+import com.my.commerce.service.OrderService;
 import com.my.commerce.service.WishService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,7 @@ import java.util.List;
 @RequestMapping("/wishes")
 public class WishController {
     private final WishService wishService;
+    private final OrderService orderService;
 
     /**
      * 장바구니 항목 추가 API
@@ -66,6 +70,19 @@ public class WishController {
         List<GetWishProductResDTO> getWishProductResDTOS = wishService.getWishProducts(principal);
 
         return new BaseResponse<>(getWishProductResDTOS);
+    }
+
+    /**
+     * 장바구니에서 주문 추가 API
+     *
+     * @param postWishOrderReqDTO 주문 정보
+     * @return String
+     */
+    @PostMapping("/orders")
+    private BaseResponse<String> postWishOrder(Principal principal, @RequestBody PostWishOrderReqDTO postWishOrderReqDTO) {
+        String postWishOrderRes = orderService.postWishOrder(principal, postWishOrderReqDTO);
+
+        return new BaseResponse<>(postWishOrderRes);
     }
 
 

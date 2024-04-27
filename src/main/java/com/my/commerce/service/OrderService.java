@@ -3,10 +3,9 @@ package com.my.commerce.service;
 import com.my.commerce.common.BaseException;
 import com.my.commerce.domain.*;
 import com.my.commerce.dto.Order.*;
-import com.my.commerce.repository.MemberRepository;
-import com.my.commerce.repository.OrderProductRepository;
-import com.my.commerce.repository.OrderRepository;
-import com.my.commerce.repository.ProductRepository;
+import com.my.commerce.dto.Wish.PostOrderWIshProductReqDTO;
+import com.my.commerce.dto.Wish.PostWishOrderReqDTO;
+import com.my.commerce.repository.*;
 import com.my.commerce.util.OrderStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +31,7 @@ public class OrderService {
     private final MemberRepository memberRepository;
     private final OrderProductRepository orderProductRepository;
     private final ProductRepository productRepository;
+    private final WishProductRepository wishProductRepository;
 
     /**
      * 주문 추가 API
@@ -53,6 +53,38 @@ public class OrderService {
 
                 // 재고 줄이기
                 product.updateStock(product.getStock() - postOrderProductReqDTO.getCount());
+            }
+            else {
+                throw new BaseException(PRODUCT_INVALID_ID);
+            }
+        }
+
+        return "주문이 완료되었습니다.";
+    }
+
+    /**
+     * 장바구니 주문 추가 API
+     */
+    @Transactional
+    public String postWishOrder(Principal principal, PostWishOrderReqDTO postWishOrderReqDTO) {
+        // 주문 만들기
+        Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
+
+        Orders orders = postWishOrderReqDTO.toEntity(member.get(), postWishOrderReqDTO.getTotal(), OrderStatus.ORDERED);
+        orderRepository.save(orders);
+
+        // 주문 상품 만들기
+        for (PostOrderWIshProductReqDTO postOrderWIshProductReqDTO : postWishOrderReqDTO.getOrderProducts()) {
+            Product product = productRepository.findById(postOrderWIshProductReqDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
+            if (product.getStatus() == 1) {
+                OrderProduct orderProduct = postOrderWIshProductReqDTO.toEntity(orders, product, postOrderWIshProductReqDTO);
+                orderProductRepository.save(orderProduct);
+
+                // 장바구니 항목 삭제
+                wishProductRepository.deleteById(postOrderWIshProductReqDTO.getWishProductId());
+
+                // 재고 줄이기
+                product.updateStock(product.getStock() - postOrderWIshProductReqDTO.getCount());
             }
             else {
                 throw new BaseException(PRODUCT_INVALID_ID);
