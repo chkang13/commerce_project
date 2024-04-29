@@ -30,10 +30,15 @@ subprojects {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-validation'
         implementation 'org.springframework.boot:spring-boot-starter-web'
+
         compileOnly 'org.projectlombok:lombok'
-        developmentOnly 'org.springframework.boot:spring-boot-devtools'
         annotationProcessor 'org.projectlombok:lombok'
+
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        // Spring cloud
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
         // DB (mysql)
         implementation 'org.springframework.boot:spring-boot-starter-jdbc'
@@ -57,7 +62,17 @@ subprojects {
         // Mail
         implementation 'org.springframework.boot:spring-boot-starter-mail:3.0.5'
         implementation 'javax.mail:javax.mail-api:1.6.2'
+    }
 
+    // Eureka Server를 위한 설정
+    ext {
+        set('springCloudVersion', "2023.0.0")
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
     }
 
     tasks.named('test') {
@@ -68,8 +83,6 @@ subprojects {
 
 bootJar { enabled = false }
 jar { enabled = true }
-
-
 
 project(':member-service') {
     dependencies {
