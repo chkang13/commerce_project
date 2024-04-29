@@ -4,56 +4,87 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
-group = 'com.my'
-version = '0.0.1-SNAPSHOT'
-
-java {
-    sourceCompatibility = '17'
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
-    // DB (mysql)
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    group = 'com.my'
+    version = '0.0.1-SNAPSHOT'
+    sourceCompatibility = '17'
 
-    // JPA, Hibernate
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.hibernate:hibernate-validator-test-utils:5.4.3.Final'
+    repositories {
+        mavenCentral()
+    }
 
-    // Redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
 
-    // Spring Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        compileOnly 'org.projectlombok:lombok'
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+        annotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    // JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+        // DB (mysql)
+        implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+        runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // Mail
-    implementation 'org.springframework.boot:spring-boot-starter-mail:3.0.5'
-    implementation 'javax.mail:javax.mail-api:1.6.2'
+        // JPA, Hibernate
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.hibernate:hibernate-validator-test-utils:5.4.3.Final'
+
+        // Redis
+        implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+        // Spring Security
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+
+        // JWT
+        implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+        implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+        implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+        // Mail
+        implementation 'org.springframework.boot:spring-boot-starter-mail:3.0.5'
+        implementation 'javax.mail:javax.mail-api:1.6.2'
+
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+bootJar { enabled = false }
+jar { enabled = true }
+
+
+
+project(':member-service') {
+    dependencies {
+        implementation project(':core-service')
+    }
+}
+
+project(':product-service') {
+    dependencies {
+        implementation project(':core-service')
+    }
+}
+
+project(':order-service') {
+    dependencies {
+        implementation project(':core-service')
+    }
 }
