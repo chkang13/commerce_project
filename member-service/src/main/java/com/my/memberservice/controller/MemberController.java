@@ -6,10 +6,7 @@ import com.my.memberservice.dto.Member.PatchPasswordReqDTO;
 import com.my.memberservice.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -27,8 +24,8 @@ public class MemberController {
      * @return String
      * */
     @PatchMapping
-    private BaseResponse<String> patchMember(Principal principal, @RequestBody PatchMemberReqDTO patchMemberReqDTO) {
-        String patchMemberRes = memberService.patchMember(principal, patchMemberReqDTO);
+    private BaseResponse<String> patchMember(@RequestHeader Long memberId , @RequestBody PatchMemberReqDTO patchMemberReqDTO) {
+        String patchMemberRes = memberService.patchMember(memberId, patchMemberReqDTO);
 
         return new BaseResponse<>(patchMemberRes);
     }
@@ -40,8 +37,8 @@ public class MemberController {
      * @return String
      * */
     @PatchMapping("/password")
-    private BaseResponse<String> patchPassword(Principal principal, @RequestBody PatchPasswordReqDTO patchPasswordReqDTO) {
-        String patchPasswordRes = memberService.patchPassword(principal, patchPasswordReqDTO);
+    private BaseResponse<String> patchPassword(@RequestHeader Long memberId, @RequestBody PatchPasswordReqDTO patchPasswordReqDTO) {
+        String patchPasswordRes = memberService.patchPassword(memberId, patchPasswordReqDTO);
 
         return new BaseResponse<>(patchPasswordRes);
     }

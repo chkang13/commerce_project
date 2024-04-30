@@ -33,16 +33,16 @@ public class SecurityConfig{
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                                 // 해당 API에 대해서는 모든 요청을 허가
-                                .requestMatchers("/auth/signup").permitAll()
-                                .requestMatchers("/auth/login").permitAll()
-                                .requestMatchers("/auth/email").permitAll()
-                                .requestMatchers("/auth/email/check").permitAll()
-                                .requestMatchers("/products/**").permitAll()
+                                //.requestMatchers("/auth/signup").permitAll()
+                                //.requestMatchers("/auth/login").permitAll()
+                                //.requestMatchers("/auth/email").permitAll()
+                                //.requestMatchers("/auth/email/check").permitAll()
+                                //.requestMatchers("/products/**").permitAll()
                         // USER 권한이 있어야 요청할 수 있음
-                                .requestMatchers("/members/test").hasRole("USER")
-                                .anyRequest().authenticated())
+                                //.requestMatchers("/members/test").hasRole("USER")
+                                .anyRequest().permitAll())
                 // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
-                .addFilterBefore(new AuthenticationFilter(tokenProvider, redisUtilService, authenticationManager()), UsernamePasswordAuthenticationFilter.class)
+                //.addFilterBefore(new AuthenticationFilter(tokenProvider, redisUtilService, authenticationManager()), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

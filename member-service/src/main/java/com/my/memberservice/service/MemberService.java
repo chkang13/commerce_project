@@ -27,8 +27,8 @@ public class MemberService {
      * 유저 정보 수정 API
      * */
     @Transactional
-    public String patchMember(Principal principal, PatchMemberReqDTO patchMemberReqDTO) {
-        Member member = memberRepository.findById(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
+    public String patchMember(Long memberId, PatchMemberReqDTO patchMemberReqDTO) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
         // 정보 수정
         member.update(patchMemberReqDTO.getPhone(), patchMemberReqDTO.getAddress());
 
@@ -39,8 +39,8 @@ public class MemberService {
      * 유저 비밀번호 수정 API
      * */
     @Transactional
-    public String patchPassword(Principal principal, PatchPasswordReqDTO patchPasswordReqDTO) {
-        Member member = memberRepository.findById(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
+    public String patchPassword(Long memberId, PatchPasswordReqDTO patchPasswordReqDTO) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new BaseException(MEMBER_INVALID_USER));
 
         // 비밀번호 일치 여부 확인
         if (!passwordEncoder.matches(patchPasswordReqDTO.getCurrentPassword(), member.getPassword())) {

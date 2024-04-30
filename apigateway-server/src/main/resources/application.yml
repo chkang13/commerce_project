@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: apigateway-server
+
+  redis:
+    data:
+      host: localhost
+      port: 6379
+
   cloud:
     gateway:
       routes:
@@ -14,11 +20,50 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
 
         - id: member-service
           uri: lb://MEMBER-SERVICE
           predicates:
-            - Path=/auth/**
+            - Path=/auth/logout
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
+            - Path=/auth/signup
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/(?<segment>.*), /$\{segment}
+
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
+            - Path=/auth/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/(?<segment>.*), /$\{segment}
+
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
+            - Path=/auth/email
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/(?<segment>.*), /$\{segment}
+
+        - id: member-service
+          uri: lb://MEMBER-SERVICE
+          predicates:
+            - Path=/auth/email/check
+            - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/(?<segment>.*), /$\{segment}
@@ -30,6 +75,7 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
 
         - id: order-service
           uri: lb://ORDER-SERVICE
@@ -38,6 +84,7 @@ spring:
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
 
         - id: product-service
           uri: lb://PRODUCT-SERVICE
@@ -55,3 +102,6 @@ eureka:
     fetch-registry: true
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
+
+jwt:
+  secret: 64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff
