@@ -2,7 +2,6 @@ package com.my.orderservice.dto.Wish;
 
 import com.my.orderservice.domain.OrderProduct;
 import com.my.orderservice.domain.Orders;
-import com.my.orderservice.domain.Product;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,12 +22,12 @@ public class PostOrderWIshProductReqDTO {
         this.price = price;
     }
 
-    public static OrderProduct toEntity(Orders orders, Product product, PostOrderWIshProductReqDTO postOrderWIshProductReqDTO) {
+    public static OrderProduct toEntity(Orders orders, PostOrderWIshProductReqDTO postOrderWIshProductReqDTO) {
         return OrderProduct.builder()
                 .count(postOrderWIshProductReqDTO.getCount())
                 .price(postOrderWIshProductReqDTO.getPrice())
                 .orders(orders)
-                .product(product)
+                .productId(postOrderWIshProductReqDTO.getProductId())
                 .build();
     }
 

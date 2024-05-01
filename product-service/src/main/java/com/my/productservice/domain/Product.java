@@ -24,10 +24,6 @@ public class Product extends BaseEntity {
     private int price;
     private int status;
     private int stock;
-    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
-    private List<OrderProduct> orderProducts = new ArrayList<>();
-    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
-    private List<WishProduct> wishProducts = new ArrayList<>();
 
     @Builder
     public Product(Long id, String title, String image, int price, int status, int stock) {

@@ -1,6 +1,5 @@
 package com.my.orderservice.dto.Order;
 
-import com.my.orderservice.domain.Member;
 import com.my.orderservice.domain.Orders;
 import com.my.orderservice.util.OrderStatus;
 import lombok.Builder;
@@ -19,9 +18,9 @@ public class PostOrderReqDTO {
         this.orderProducts = postOrderProductReqDTOS;
     }
 
-    public static Orders toEntity(Member member, int total, OrderStatus orderStatus) {
+    public static Orders toEntity(Long memberId, int total, OrderStatus orderStatus) {
         return Orders.builder()
-                .member(member)
+                .memberId(memberId)
                 .orderStatus(orderStatus)
                 .total(total)
                 .build();

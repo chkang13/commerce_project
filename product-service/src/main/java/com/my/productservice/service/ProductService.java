@@ -2,8 +2,8 @@ package com.my.productservice.service;
 
 import com.my.coreservice.global.common.BaseException;
 import com.my.productservice.domain.Product;
-import com.my.productservice.dto.Product.GetProductResDTO;
-import com.my.productservice.dto.Product.PostProductReqDTO;
+import com.my.productservice.dto.GetProductResDTO;
+import com.my.productservice.dto.PostProductReqDTO;
 import com.my.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

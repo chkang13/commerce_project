@@ -29,10 +29,6 @@ public class Member extends BaseEntity implements UserDetails {
     private String password;
     private String phone;
     private String address;
-    @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE)
-    private List<Orders> orders = new ArrayList<>();
-    @OneToOne(mappedBy = "member", cascade = CascadeType.REMOVE)
-    private Wish wish;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default

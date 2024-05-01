@@ -21,16 +21,14 @@ public class OrderProduct extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orderId")
     private Orders orders;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productId")
-    private Product product;
+    private Long productId;
 
     @Builder
-    public OrderProduct(Long id, int count, int price, Orders orders, Product product) {
+    public OrderProduct(Long id, int count, int price, Orders orders, Long productId) {
         this.id = id;
         this.count = count;
         this.price = price;
         this.orders = orders;
-        this.product = product;
+        this.productId = productId;
     }
 }

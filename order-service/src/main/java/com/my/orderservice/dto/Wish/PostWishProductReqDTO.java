@@ -1,6 +1,5 @@
 package com.my.orderservice.dto.Wish;
 
-import com.my.orderservice.domain.Product;
 import com.my.orderservice.domain.Wish;
 import com.my.orderservice.domain.WishProduct;
 import lombok.Builder;
@@ -19,11 +18,11 @@ public class PostWishProductReqDTO {
         this.count = count;
     }
 
-    public static WishProduct toEntity(Wish wish, Product product, int count) {
+    public static WishProduct toEntity(Wish wish, PostWishProductReqDTO postWishProductReqDTO) {
         return WishProduct.builder()
-                .count(count)
+                .count(postWishProductReqDTO.getCount())
                 .wish(wish)
-                .product(product)
+                .productId(postWishProductReqDTO.getProductId())
                 .build();
     }
 

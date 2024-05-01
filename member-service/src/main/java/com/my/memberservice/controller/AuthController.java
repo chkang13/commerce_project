@@ -1,9 +1,9 @@
 package com.my.memberservice.controller;
 
 import com.my.coreservice.global.common.BaseResponse;
-import com.my.memberservice.dto.Member.PostEmailCheckReqDTO;
-import com.my.memberservice.dto.Member.PostEmailReqDTO;
-import com.my.memberservice.dto.Member.PostMemberReqDTO;
+import com.my.memberservice.dto.PostEmailCheckReqDTO;
+import com.my.memberservice.dto.PostEmailReqDTO;
+import com.my.memberservice.dto.PostMemberReqDTO;
 import com.my.memberservice.security.PostLoginReqDTO;
 import com.my.memberservice.security.TokenDTO;
 import com.my.memberservice.service.AuthService;

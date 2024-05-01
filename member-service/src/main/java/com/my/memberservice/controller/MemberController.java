@@ -1,14 +1,12 @@
 package com.my.memberservice.controller;
 
 import com.my.coreservice.global.common.BaseResponse;
-import com.my.memberservice.dto.Member.PatchMemberReqDTO;
-import com.my.memberservice.dto.Member.PatchPasswordReqDTO;
+import com.my.memberservice.dto.PatchMemberReqDTO;
+import com.my.memberservice.dto.PatchPasswordReqDTO;
 import com.my.memberservice.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Principal;
 
 @Slf4j
 @RequiredArgsConstructor

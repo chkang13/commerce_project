@@ -1,13 +1,12 @@
 package com.my.memberservice.service;
 
 import com.my.coreservice.global.common.BaseException;
+import com.my.memberservice.client.OrderServiceFeignClient;
 import com.my.memberservice.domain.Member;
-import com.my.memberservice.domain.Wish;
-import com.my.memberservice.dto.Member.PostEmailCheckReqDTO;
-import com.my.memberservice.dto.Member.PostEmailReqDTO;
-import com.my.memberservice.dto.Member.PostMemberReqDTO;
+import com.my.memberservice.dto.PostEmailCheckReqDTO;
+import com.my.memberservice.dto.PostEmailReqDTO;
+import com.my.memberservice.dto.PostMemberReqDTO;
 import com.my.memberservice.repository.MemberRepository;
-import com.my.memberservice.repository.WishRepository;
 import com.my.memberservice.security.PostLoginReqDTO;
 import com.my.memberservice.security.TokenDTO;
 import com.my.memberservice.security.TokenProvider;
@@ -33,7 +32,7 @@ import static com.my.coreservice.global.common.BaseResponseStatus.*;
 @Service
 public class AuthService {
     private final MemberRepository memberRepository;
-    private final WishRepository wishRepository;
+    private final OrderServiceFeignClient orderServiceFeignClient;
     private final TokenProvider tokenProvider;
     private final JavaMailSender javaMailSender;
     private final RedisUtilService redisUtilService;
@@ -45,14 +44,12 @@ public class AuthService {
      */
     @Transactional
     public String signupMember(PostMemberReqDTO postMemberReqDTO){
+        log.info("dfd");
         Member member = postMemberReqDTO.toEntity(postMemberReqDTO,passwordEncoder.encode(postMemberReqDTO.getPassword()));
         member.addMemberRole("USER");
         memberRepository.save(member);
 
-        Wish wish = Wish.builder()
-                .member(member)
-                .build();
-        wishRepository.save(wish);
+        orderServiceFeignClient.addWish(member.getId());
 
         return "회원가입 성공하였습니다.";
     }

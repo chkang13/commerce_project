@@ -1,8 +1,8 @@
 package com.my.orderservice.dto.Wish;
 
 
-import com.my.orderservice.domain.Product;
 import com.my.orderservice.domain.WishProduct;
+import com.my.orderservice.dto.client.GetProductResDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -25,12 +25,12 @@ public class GetWishProductResDTO {
         this.price = price;
     }
 
-    public static GetWishProductResDTO toDTO(Product product, WishProduct wishProduct, int price) {
+    public static GetWishProductResDTO toDTO(GetProductResDTO getProductResDTO, WishProduct wishProduct, int price) {
         return GetWishProductResDTO.builder()
-                .productId(product.getId())
+                .productId(getProductResDTO.getProductId())
                 .wishProductId(wishProduct.getId())
-                .title(product.getTitle())
-                .image(product.getImage())
+                .title(getProductResDTO.getTitle())
+                .image(getProductResDTO.getImage())
                 .count(wishProduct.getCount())
                 .price(price)
                 .build();

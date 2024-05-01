@@ -19,15 +19,13 @@ public class Wish extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wishId")
     private Long id;
-    @OneToOne
-    @JoinColumn(name = "memberId")
-    private Member member;
+    private Long memberId;
     @OneToMany(mappedBy = "wish", cascade = CascadeType.REMOVE)
     private List<WishProduct> wishProducts = new ArrayList<>();
 
     @Builder
-    public Wish(Long id, Member member) {
+    public Wish(Long id, Long memberId) {
         this.id = id;
-        this.member = member;
+        this.memberId = memberId;
     }
 }

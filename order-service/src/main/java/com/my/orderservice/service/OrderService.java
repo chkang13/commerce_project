@@ -1,13 +1,13 @@
 package com.my.orderservice.service;
 
 import com.my.coreservice.global.common.BaseException;
-import com.my.orderservice.domain.Member;
+import com.my.orderservice.client.ProductServiceFeignClient;
 import com.my.orderservice.domain.OrderProduct;
 import com.my.orderservice.domain.Orders;
-import com.my.orderservice.domain.Product;
 import com.my.orderservice.dto.Order.*;
 import com.my.orderservice.dto.Wish.PostOrderWIshProductReqDTO;
 import com.my.orderservice.dto.Wish.PostWishOrderReqDTO;
+import com.my.orderservice.dto.client.GetProductResDTO;
 import com.my.orderservice.repository.*;
 import com.my.orderservice.util.OrderStatus;
 import jakarta.transaction.Transactional;
@@ -31,35 +31,26 @@ import static com.my.coreservice.global.common.BaseResponseStatus.*;
 @Transactional
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final MemberRepository memberRepository;
     private final OrderProductRepository orderProductRepository;
-    private final ProductRepository productRepository;
     private final WishProductRepository wishProductRepository;
+    private final ProductServiceFeignClient productServiceFeignClient;
 
     /**
      * 주문 추가 API
      */
     @Transactional
-    public String postOrder(Principal principal, PostOrderReqDTO postOrderReqDTO) {
+    public String postOrder(Long memberId, PostOrderReqDTO postOrderReqDTO) {
         // 주문 만들기
-        Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
-
-        Orders orders = postOrderReqDTO.toEntity(member.get(), postOrderReqDTO.getTotal(), OrderStatus.ORDERED);
+        Orders orders = postOrderReqDTO.toEntity(memberId, postOrderReqDTO.getTotal(), OrderStatus.ORDERED);
         orderRepository.save(orders);
 
         // 주문 상품 만들기
         for (PostOrderProductReqDTO postOrderProductReqDTO : postOrderReqDTO.getOrderProducts()) {
-            Product product = productRepository.findById(postOrderProductReqDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
-            if (product.getStatus() == 1) {
-                OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, product, postOrderProductReqDTO);
+                OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, postOrderProductReqDTO);
                 orderProductRepository.save(orderProduct);
 
                 // 재고 줄이기
-                product.updateStock(product.getStock() - postOrderProductReqDTO.getCount());
-            }
-            else {
-                throw new BaseException(PRODUCT_INVALID_ID);
-            }
+                //product.updateStock(product.getStock() - postOrderProductReqDTO.getCount());
         }
 
         return "주문이 완료되었습니다.";
@@ -69,29 +60,21 @@ public class OrderService {
      * 장바구니 주문 추가 API
      */
     @Transactional
-    public String postWishOrder(Principal principal, PostWishOrderReqDTO postWishOrderReqDTO) {
+    public String postWishOrder(Long memberId, PostWishOrderReqDTO postWishOrderReqDTO) {
         // 주문 만들기
-        Optional<Member> member = memberRepository.findById(Long.valueOf(principal.getName()));
-
-        Orders orders = postWishOrderReqDTO.toEntity(member.get(), postWishOrderReqDTO.getTotal(), OrderStatus.ORDERED);
+        Orders orders = postWishOrderReqDTO.toEntity(memberId, postWishOrderReqDTO.getTotal(), OrderStatus.ORDERED);
         orderRepository.save(orders);
 
         // 주문 상품 만들기
         for (PostOrderWIshProductReqDTO postOrderWIshProductReqDTO : postWishOrderReqDTO.getOrderProducts()) {
-            Product product = productRepository.findById(postOrderWIshProductReqDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
-            if (product.getStatus() == 1) {
-                OrderProduct orderProduct = postOrderWIshProductReqDTO.toEntity(orders, product, postOrderWIshProductReqDTO);
-                orderProductRepository.save(orderProduct);
+            OrderProduct orderProduct = postOrderWIshProductReqDTO.toEntity(orders, postOrderWIshProductReqDTO);
+            orderProductRepository.save(orderProduct);
 
-                // 장바구니 항목 삭제
-                wishProductRepository.deleteById(postOrderWIshProductReqDTO.getWishProductId());
+            // 장바구니 항목 삭제
+            wishProductRepository.deleteById(postOrderWIshProductReqDTO.getWishProductId());
 
-                // 재고 줄이기
-                product.updateStock(product.getStock() - postOrderWIshProductReqDTO.getCount());
-            }
-            else {
-                throw new BaseException(PRODUCT_INVALID_ID);
-            }
+            // 재고 줄이기
+            //product.updateStock(product.getStock() - postOrderWIshProductReqDTO.getCount());
         }
 
         return "주문이 완료되었습니다.";
@@ -100,9 +83,9 @@ public class OrderService {
     /**
      * 주문 리스트 조회 API
      */
-    public List<GetOrdersResDTO> getOrderList(Principal principal) {
+    public List<GetOrdersResDTO> getOrderList(Long memberId) {
         List<GetOrdersResDTO> getOrdersResDTOS = new ArrayList<>();
-        List<Orders> orders = orderRepository.findByMemberId(Long.parseLong(principal.getName()));
+        List<Orders> orders = orderRepository.findByMemberId(memberId);
 
         for (Orders order : orders) {
             getOrdersResDTOS.add(GetOrdersResDTO.toDTO(order));
@@ -114,16 +97,17 @@ public class OrderService {
     /**
      * 주문 조회 API
      */
-    public GetOrderResDTO getOrders(Principal principal, Long orderId) {
+    public GetOrderResDTO getOrders(Long memberId, Long orderId) {
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
         GetOrderResDTO getOrderResDTO;
 
-        if (order.getMember().getId() == Long.parseLong(principal.getName())) {
+        if (order.getMemberId() == memberId) {
             List<OrderProduct> orderProducts = order.getOrderProducts();
             List<GetOrderProductResDTO> getOrderProductResDTOS = new ArrayList<>();
 
             for (OrderProduct orderProduct : orderProducts) {
-                getOrderProductResDTOS.add(GetOrderProductResDTO.toDTO(orderProduct, orderProduct.getProduct()));
+                GetProductResDTO getProductResDTO = productServiceFeignClient.getInProduct(orderProduct.getProductId());
+                getOrderProductResDTOS.add(GetOrderProductResDTO.toDTO(orderProduct, getProductResDTO));
             }
 
             getOrderResDTO = GetOrderResDTO.toDTO(order, getOrderProductResDTOS);
@@ -162,15 +146,15 @@ public class OrderService {
      * 주문 취소 API
      */
     @Transactional
-    public String cancelOrder (Principal principal, Long orderId) {
+    public String cancelOrder (Long memberId, Long orderId) {
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
 
-        if (order.getMember().getId() == Long.parseLong(principal.getName())) {
+        if (order.getMemberId() == memberId) {
             // 배송중 이전까지만
             if (order.getStatus().equals(OrderStatus.ORDERED)) {
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
                     // 재고 늘리기
-                    orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                    //orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
                 }
             }
             else {
@@ -189,10 +173,10 @@ public class OrderService {
      * 주문 반품 신청 API
      */
     @Transactional
-    public String refundOrder (Principal principal, Long orderId) {
+    public String refundOrder (Long memberId, Long orderId) {
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
 
-        if (order.getMember().getId() == Long.parseLong(principal.getName())) {
+        if (order.getMemberId() == memberId) {
             Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // 현재 시간
             LocalDate currentDate = currentTime.toLocalDateTime().toLocalDate();
 
@@ -224,7 +208,7 @@ public class OrderService {
             if (order.getStatus().equals(OrderStatus.REFUND)) {
                 // 재고 늘리기
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
-                    orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                    //orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
                 }
 
                 order.updateOrderStatus(OrderStatus.REFUNDED);

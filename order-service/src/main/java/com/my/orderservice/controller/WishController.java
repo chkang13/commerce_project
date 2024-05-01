@@ -22,6 +22,13 @@ public class WishController {
     private final WishService wishService;
     private final OrderService orderService;
 
+    @PostMapping("/{memberId}")
+    private String addWish(@PathVariable("memberId") Long memberId) {
+        String addWishRes = wishService.addWish(memberId);
+
+         return addWishRes;
+    }
+
     /**
      * 장바구니 항목 추가 API
      *
@@ -29,8 +36,8 @@ public class WishController {
      * @return String
      */
     @PostMapping
-    private BaseResponse<String> postWishProduct(Principal principal, @RequestBody PostWishProductReqDTO postWishProductReqDTO) {
-        String postWishProductRes = wishService.postWishProduct(principal, postWishProductReqDTO);
+    private BaseResponse<String> postWishProduct(@RequestHeader Long memberId, @RequestBody PostWishProductReqDTO postWishProductReqDTO) {
+        String postWishProductRes = wishService.postWishProduct(memberId, postWishProductReqDTO);
 
         return new BaseResponse<>(postWishProductRes);
     }
@@ -41,8 +48,8 @@ public class WishController {
      * @return String
      */
     @PatchMapping()
-    private BaseResponse<String> patchWishProduct(Principal principal, @RequestBody PatchWishProductReqDTO patchWishProductReqDTO) {
-        String patchWishProductRes = wishService.patchWishProduct(principal, patchWishProductReqDTO);
+    private BaseResponse<String> patchWishProduct(@RequestHeader Long memberId, @RequestBody PatchWishProductReqDTO patchWishProductReqDTO) {
+        String patchWishProductRes = wishService.patchWishProduct(memberId, patchWishProductReqDTO);
 
         return new BaseResponse<>(patchWishProductRes);
     }
@@ -53,8 +60,8 @@ public class WishController {
      * @return String
      */
     @DeleteMapping("/{wishProductId}")
-    private BaseResponse<String> deleteWishProduct(Principal principal, @PathVariable("wishProductId") Long wishProductId) {
-        String deleteWishProductRes = wishService.deleteWishProduct(principal, wishProductId);
+    private BaseResponse<String> deleteWishProduct(@RequestHeader Long memberId, @PathVariable("wishProductId") Long wishProductId) {
+        String deleteWishProductRes = wishService.deleteWishProduct(memberId, wishProductId);
 
         return new BaseResponse<>(deleteWishProductRes);
     }
@@ -65,8 +72,8 @@ public class WishController {
      * @return List<GetWishProductResDTO>
      */
     @GetMapping
-    private BaseResponse<List<GetWishProductResDTO>> getWishProducts(Principal principal) {
-        List<GetWishProductResDTO> getWishProductResDTOS = wishService.getWishProducts(principal);
+    private BaseResponse<List<GetWishProductResDTO>> getWishProducts(@RequestHeader Long memberId) {
+        List<GetWishProductResDTO> getWishProductResDTOS = wishService.getWishProducts(memberId);
 
         return new BaseResponse<>(getWishProductResDTOS);
     }
@@ -78,8 +85,8 @@ public class WishController {
      * @return String
      */
     @PostMapping("/orders")
-    private BaseResponse<String> postWishOrder(Principal principal, @RequestBody PostWishOrderReqDTO postWishOrderReqDTO) {
-        String postWishOrderRes = orderService.postWishOrder(principal, postWishOrderReqDTO);
+    private BaseResponse<String> postWishOrder(@RequestHeader Long memberId, @RequestBody PostWishOrderReqDTO postWishOrderReqDTO) {
+        String postWishOrderRes = orderService.postWishOrder(memberId, postWishOrderReqDTO);
 
         return new BaseResponse<>(postWishOrderRes);
     }

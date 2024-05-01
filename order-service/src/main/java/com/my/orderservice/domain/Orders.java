@@ -23,18 +23,16 @@ public class Orders extends BaseEntity {
     private int total;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "memberId")
-    private Member member;
+    private Long memberId;
     @OneToMany(mappedBy = "orders", cascade = CascadeType.REMOVE)
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
     @Builder
-    public Orders(Long id, int total, OrderStatus orderStatus, Member member) {
+    public Orders(Long id, int total, OrderStatus orderStatus, Long memberId) {
         this.id = id;
         this.total = total;
         this.status = orderStatus;
-        this.member = member;
+        this.memberId = memberId;
     }
 
     public void updateOrderStatus(OrderStatus orderStatus) {

@@ -1,13 +1,13 @@
 package com.my.orderservice.service;
 
 import com.my.coreservice.global.common.BaseException;
-import com.my.orderservice.domain.Product;
+import com.my.orderservice.client.ProductServiceFeignClient;
 import com.my.orderservice.domain.Wish;
 import com.my.orderservice.domain.WishProduct;
 import com.my.orderservice.dto.Wish.GetWishProductResDTO;
 import com.my.orderservice.dto.Wish.PatchWishProductReqDTO;
 import com.my.orderservice.dto.Wish.PostWishProductReqDTO;
-import com.my.orderservice.repository.ProductRepository;
+import com.my.orderservice.dto.client.GetProductResDTO;
 import com.my.orderservice.repository.WishProductRepository;
 import com.my.orderservice.repository.WishRepository;
 import jakarta.transaction.Transactional;
@@ -28,23 +28,28 @@ import static com.my.coreservice.global.common.BaseResponseStatus.*;
 public class WishService {
     private final WishRepository wishRepository;
     private final WishProductRepository wishProductRepository;
-    private final ProductRepository productRepository;
+    private final ProductServiceFeignClient productServiceFeignClient;
+
+    @Transactional
+    public String addWish(Long memberId) {
+        Wish wish = Wish.builder()
+                .memberId(memberId)
+                .build();
+
+        wishRepository.save(wish);
+
+        return "장바구니가 생성되었습니다.";
+    }
 
     /**
      * 장바구니 항목 추가 API
      */
     @Transactional
-    public String postWishProduct(Principal principal, PostWishProductReqDTO postWishProductReqDTO) {
-        Wish wish = wishRepository.findByMemberId(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
-        Product product = productRepository.findById(postWishProductReqDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
+    public String postWishProduct(Long memberId, PostWishProductReqDTO postWishProductReqDTO) {
+        Wish wish = wishRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
 
-        if (product.getStatus() == 1) {
-            WishProduct wishProduct = postWishProductReqDTO.toEntity(wish, product, postWishProductReqDTO.getCount());
-            wishProductRepository.save(wishProduct);
-        }
-        else {
-            throw new BaseException(PRODUCT_INVALID_ID);
-        }
+        WishProduct wishProduct = postWishProductReqDTO.toEntity(wish, postWishProductReqDTO);
+        wishProductRepository.save(wishProduct);
 
         return "장바구니 추가가 완료되었습니다.";
     }
@@ -53,11 +58,11 @@ public class WishService {
      * 장바구니 항목 수량 변경 API
      * */
     @Transactional
-    public String patchWishProduct(Principal principal, PatchWishProductReqDTO patchWishProductReqDTO) {
+    public String patchWishProduct(Long memberId, PatchWishProductReqDTO patchWishProductReqDTO) {
         WishProduct wishProduct = wishProductRepository.findById(patchWishProductReqDTO.getWishProductId()).orElseThrow(() -> new BaseException(WISHPRODUCT_INVALID_ID));
 
         // 권한 확인
-        if (wishProduct.getWish().getMember().getId() == Long.parseLong(principal.getName())){
+        if (wishProduct.getWish().getMemberId() == memberId){
             wishProduct.update(patchWishProductReqDTO.getCount());
         }
         else {
@@ -71,11 +76,11 @@ public class WishService {
      * 장바구니 항목 삭제 API
      * */
     @Transactional
-    public String deleteWishProduct(Principal principal, Long wishProductId) {
+    public String deleteWishProduct(Long memberId, Long wishProductId) {
         WishProduct wishProduct = wishProductRepository.findById(wishProductId).orElseThrow(() -> new BaseException(WISHPRODUCT_INVALID_ID));
 
         // 권한 확인
-        if (wishProduct.getWish().getMember().getId() == Long.parseLong(principal.getName())){
+        if (wishProduct.getWish().getMemberId() == memberId){
             wishProductRepository.deleteById(wishProductId);
         }
         else {
@@ -88,15 +93,16 @@ public class WishService {
     /**
      * 장바구니 리스트 조회 API
      */
-    public List<GetWishProductResDTO> getWishProducts(Principal principal) {
-        Wish wish = wishRepository.findByMemberId(Long.parseLong(principal.getName())).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
+    public List<GetWishProductResDTO> getWishProducts(Long memberId) {
+        Wish wish = wishRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(WISH_INVALID_ID));
         List<WishProduct> wishProducts = wish.getWishProducts();
 
         List<GetWishProductResDTO> getWishProductResDTOS = new ArrayList<>();
 
         for (WishProduct wishProduct : wishProducts) {
-            int price = wishProduct.getProduct().getPrice() * wishProduct.getCount();
-            getWishProductResDTOS.add(GetWishProductResDTO.toDTO(wishProduct.getProduct(), wishProduct, price));
+            GetProductResDTO getProductResDTO = productServiceFeignClient.getInProduct(wishProduct.getProductId());
+            int price = getProductResDTO.getPrice() * wishProduct.getCount();
+            getWishProductResDTOS.add(GetWishProductResDTO.toDTO(getProductResDTO, wishProduct, price));
         }
 
         return  getWishProductResDTOS;

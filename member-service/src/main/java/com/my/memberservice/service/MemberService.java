@@ -3,16 +3,14 @@ package com.my.memberservice.service;
 
 import com.my.coreservice.global.common.BaseException;
 import com.my.memberservice.domain.Member;
-import com.my.memberservice.dto.Member.PatchMemberReqDTO;
-import com.my.memberservice.dto.Member.PatchPasswordReqDTO;
+import com.my.memberservice.dto.PatchMemberReqDTO;
+import com.my.memberservice.dto.PatchPasswordReqDTO;
 import com.my.memberservice.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.security.Principal;
 
 import static com.my.coreservice.global.common.BaseResponseStatus.*;
 

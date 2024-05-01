@@ -2,7 +2,7 @@ package com.my.orderservice.dto.Order;
 
 
 import com.my.orderservice.domain.OrderProduct;
-import com.my.orderservice.domain.Product;
+import com.my.orderservice.dto.client.GetProductResDTO;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -25,12 +25,12 @@ public class GetOrderProductResDTO {
         this.price = price;
     }
 
-    public static GetOrderProductResDTO toDTO(OrderProduct orderProduct, Product product) {
+    public static GetOrderProductResDTO toDTO(OrderProduct orderProduct, GetProductResDTO getProductResDTO) {
         return GetOrderProductResDTO.builder()
                 .orderProductId(orderProduct.getId())
-                .productId(product.getId())
-                .title(product.getTitle())
-                .image(product.getImage())
+                .productId(getProductResDTO.getProductId())
+                .title(getProductResDTO.getTitle())
+                .image(getProductResDTO.getImage())
                 .count(orderProduct.getCount())
                 .price(orderProduct.getPrice())
                 .build();

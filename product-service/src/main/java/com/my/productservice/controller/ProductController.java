@@ -1,8 +1,8 @@
 package com.my.productservice.controller;
 
 import com.my.coreservice.global.common.BaseResponse;
-import com.my.productservice.dto.Product.GetProductResDTO;
-import com.my.productservice.dto.Product.PostProductReqDTO;
+import com.my.productservice.dto.GetProductResDTO;
+import com.my.productservice.dto.PostProductReqDTO;
 import com.my.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,5 +53,18 @@ public class ProductController {
         GetProductResDTO getProductResDTO = productService.getProduct(productId);
 
         return new BaseResponse<>(getProductResDTO);
+    }
+
+    /**
+     * 상품 상세 조회 API(FEIGN)
+     *
+     * @param productId
+     * @return GetProductResDTO
+     */
+    @GetMapping("/internal/{productId}")
+    public GetProductResDTO getInProduct (@PathVariable("productId") Long productId) {
+        GetProductResDTO getProductResDTO = productService.getProduct(productId);
+
+        return getProductResDTO;
     }
 }

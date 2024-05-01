@@ -26,8 +26,8 @@ public class OrderController {
      * @return String
      */
     @PostMapping
-    private BaseResponse<String> postOrder(Principal principal, @RequestBody PostOrderReqDTO postOrderReqDTO) {
-        String postOrderRes = orderService.postOrder(principal, postOrderReqDTO);
+    private BaseResponse<String> postOrder(@RequestHeader Long memberId, @RequestBody PostOrderReqDTO postOrderReqDTO) {
+        String postOrderRes = orderService.postOrder(memberId, postOrderReqDTO);
 
         return new BaseResponse<>(postOrderRes);
     }
@@ -39,8 +39,8 @@ public class OrderController {
      */
 
     @GetMapping()
-    public BaseResponse<List<GetOrdersResDTO>> getOrderList (Principal principal) {
-        List<GetOrdersResDTO> getOrdersResDTOS = orderService.getOrderList(principal);
+    public BaseResponse<List<GetOrdersResDTO>> getOrderList (@RequestHeader Long memberId) {
+        List<GetOrdersResDTO> getOrdersResDTOS = orderService.getOrderList(memberId);
 
         return new BaseResponse<>(getOrdersResDTOS);
     }
@@ -52,8 +52,8 @@ public class OrderController {
      * @param orderId 조회할 주문 아이디
      */
     @GetMapping("/{orderId}")
-    private BaseResponse<GetOrderResDTO> getOrders(Principal principal, @PathVariable("orderId") Long orderId) {
-        GetOrderResDTO getOrderResDTO = orderService.getOrders(principal, orderId);
+    private BaseResponse<GetOrderResDTO> getOrders(@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) {
+        GetOrderResDTO getOrderResDTO = orderService.getOrders(memberId, orderId);
 
         return new BaseResponse<>(getOrderResDTO);
     }
@@ -64,8 +64,8 @@ public class OrderController {
      * @param orderId 취소할 주문 아이디
      */
     @PatchMapping("/{orderId}")
-    private BaseResponse<String> cancelOrder (Principal principal, @PathVariable("orderId") Long orderId) {
-        String cancelRes = orderService.cancelOrder(principal, orderId);
+    private BaseResponse<String> cancelOrder (@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) {
+        String cancelRes = orderService.cancelOrder(memberId, orderId);
 
         return new BaseResponse<>(cancelRes);
     }
@@ -76,8 +76,8 @@ public class OrderController {
      * @param orderId 반품할 주문 아이디
      */
     @PatchMapping("/refund/{orderId}")
-    private BaseResponse<String> refundOrder (Principal principal, @PathVariable("orderId") Long orderId) {
-        String refundRes = orderService.refundOrder(principal, orderId);
+    private BaseResponse<String> refundOrder (@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) {
+        String refundRes = orderService.refundOrder(memberId, orderId);
 
         return new BaseResponse<>(refundRes);
     }
