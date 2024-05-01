@@ -16,8 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig{
-    private final AuthenticationConfiguration authenticationConfiguration;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -30,11 +28,6 @@ public class SecurityConfig{
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().permitAll())
                 .build();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager() throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
