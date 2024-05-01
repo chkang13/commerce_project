@@ -18,7 +18,7 @@ public class SecurityConfig {
         return http
                 // application.yml에서 필터 걸어줄 것이기 때문
                 .authorizeExchange(exchanges -> exchanges
-                                .anyExchange().permitAll()
+                        .anyExchange().permitAll()
                 )
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // Disable session management
                 // REST API이므로 basic auth 및 csrf 보안을 사용하지 않음
