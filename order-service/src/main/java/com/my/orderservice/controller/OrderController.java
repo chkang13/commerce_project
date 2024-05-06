@@ -20,7 +20,7 @@ public class OrderController {
     private final OrderService orderService;
 
     /**
-     * 주문 추가 API
+     * 주문 추가 API(결제 준비)
      *
      * @param postOrderReqDTO 주문 정보
      * @return String
@@ -31,6 +31,19 @@ public class OrderController {
 
         return new BaseResponse<>(postOrderRes);
     }
+
+    /**
+     * 주문 완성 API(결제 시도)
+     *
+     * @param orderId 시도할 주문 아이디
+     */
+    @PatchMapping("/payment/{orderId}")
+    private BaseResponse<String> patchOrder (@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) {
+        String patchRes = orderService.patchOrder(memberId, orderId);
+
+        return new BaseResponse<>(patchRes);
+    }
+
 
     /**
      * 주문 목록 조회 API

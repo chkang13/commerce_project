@@ -22,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static com.my.coreservice.global.common.BaseResponseStatus.*;
 
@@ -41,7 +42,7 @@ public class OrderService {
     @Transactional
     public String postOrder(Long memberId, PostOrderReqDTO postOrderReqDTO) {
         // 주문 만들기
-        Orders orders = postOrderReqDTO.toEntity(memberId, postOrderReqDTO.getTotal(), OrderStatus.ORDERED);
+        Orders orders = postOrderReqDTO.toEntity(memberId, postOrderReqDTO.getTotal(), OrderStatus.PAYMENT);
         orderRepository.save(orders);
 
         // 주문 상품 만들기
@@ -53,32 +54,68 @@ public class OrderService {
                 //product.updateStock(product.getStock() - postOrderProductReqDTO.getCount());
         }
 
-        return "주문이 완료되었습니다.";
+        return "결제 준비가 완료되었습니다.";
     }
 
     /**
-     * 장바구니 주문 추가 API
+     * 주문 완성 API
      */
     @Transactional
-    public String postWishOrder(Long memberId, PostWishOrderReqDTO postWishOrderReqDTO) {
-        // 주문 만들기
-        Orders orders = postWishOrderReqDTO.toEntity(memberId, postWishOrderReqDTO.getTotal(), OrderStatus.ORDERED);
-        orderRepository.save(orders);
+    public String patchOrder (Long memberId, Long orderId) {
+        Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
 
-        // 주문 상품 만들기
-        for (PostOrderWIshProductReqDTO postOrderWIshProductReqDTO : postWishOrderReqDTO.getOrderProducts()) {
-            OrderProduct orderProduct = postOrderWIshProductReqDTO.toEntity(orders, postOrderWIshProductReqDTO);
-            orderProductRepository.save(orderProduct);
+        if (order.getMemberId() == memberId) {
+            // 결제 준비 상태에서만
+            if (order.getStatus().equals(OrderStatus.PAYMENT)) {
+                // 결제 중 20% 이탈
+                if (new Random().nextInt(100) < 80) {
+                    order.updateOrderStatus(OrderStatus.ORDERED);
+                }
+                else {
 
-            // 장바구니 항목 삭제
-            wishProductRepository.deleteById(postOrderWIshProductReqDTO.getWishProductId());
+                    for (OrderProduct orderProduct : order.getOrderProducts()) {
 
-            // 재고 줄이기
-            //product.updateStock(product.getStock() - postOrderWIshProductReqDTO.getCount());
+                        // 재고 늘리기
+                        //orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                    }
+
+                    throw new BaseException(ORDER_CANCELED_PAYMENT);
+                }
+            }
+            else {
+                throw new BaseException(ORDER_INVALID_PAYMENT);
+            }
+        }
+        else {
+            throw new BaseException(AUTHORITY_INVALID);
         }
 
-        return "주문이 완료되었습니다.";
+        return "주문 완료 되었습니다.";
     }
+
+//    /**
+//     * 장바구니 주문 추가 API
+//     */
+//    @Transactional
+//    public String postWishOrder(Long memberId, PostWishOrderReqDTO postWishOrderReqDTO) {
+//        // 주문 만들기
+//        Orders orders = postWishOrderReqDTO.toEntity(memberId, postWishOrderReqDTO.getTotal(), OrderStatus.PAYMENT);
+//        orderRepository.save(orders);
+//
+//        // 주문 상품 만들기
+//        for (PostOrderWIshProductReqDTO postOrderWIshProductReqDTO : postWishOrderReqDTO.getOrderProducts()) {
+//            OrderProduct orderProduct = postOrderWIshProductReqDTO.toEntity(orders, postOrderWIshProductReqDTO);
+//            orderProductRepository.save(orderProduct);
+//
+//            // 장바구니 항목 삭제
+//            wishProductRepository.deleteById(postOrderWIshProductReqDTO.getWishProductId());
+//
+//            // 재고 줄이기
+//            //product.updateStock(product.getStock() - postOrderWIshProductReqDTO.getCount());
+//        }
+//
+//        return "주문이 완료되었습니다.";
+//    }
 
     /**
      * 주문 리스트 조회 API
@@ -151,7 +188,7 @@ public class OrderService {
 
         if (order.getMemberId() == memberId) {
             // 배송중 이전까지만
-            if (order.getStatus().equals(OrderStatus.ORDERED)) {
+            if (order.getStatus().equals(OrderStatus.ORDERED) || order.getStatus().equals(OrderStatus.PAYMENT)) {
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
                     // 재고 늘리기
                     //orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
