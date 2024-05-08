@@ -4,6 +4,8 @@ import com.my.coreservice.global.common.BaseException;
 import com.my.productservice.domain.Product;
 import com.my.productservice.dto.GetProductResDTO;
 import com.my.productservice.dto.PostProductReqDTO;
+import com.my.productservice.kafka.dto.StockHandleDTO;
+import com.my.productservice.kafka.dto.WriteStockMessage;
 import com.my.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,15 @@ public class ProductService {
             return getProductResDTO;
         } else {
             throw new BaseException(PRODUCT_INVALID_ID);
+        }
+    }
+
+    public void reduceStock(final WriteStockMessage writeStockMessage) {
+
+        for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS()) {
+            log.info(String.valueOf(stockHandleDTO.getProductId()));
+            Product product = productRepository.findById(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
+            product.updateStock(product.getStock() - stockHandleDTO.getCount());
         }
     }
 

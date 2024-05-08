@@ -1,13 +1,14 @@
 package com.my.orderservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.my.coreservice.global.common.BaseException;
 import com.my.orderservice.client.ProductServiceFeignClient;
 import com.my.orderservice.domain.OrderProduct;
 import com.my.orderservice.domain.Orders;
 import com.my.orderservice.dto.Order.*;
-import com.my.orderservice.dto.Wish.PostOrderWIshProductReqDTO;
-import com.my.orderservice.dto.Wish.PostWishOrderReqDTO;
 import com.my.orderservice.dto.client.GetProductResDTO;
+import com.my.orderservice.kafka.OrderKafkaProducer;
+import com.my.orderservice.kafka.dto.StockHandleDTO;
 import com.my.orderservice.repository.*;
 import com.my.orderservice.util.OrderStatus;
 import jakarta.transaction.Transactional;
@@ -15,13 +16,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import static com.my.coreservice.global.common.BaseResponseStatus.*;
@@ -35,24 +34,31 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final WishProductRepository wishProductRepository;
     private final ProductServiceFeignClient productServiceFeignClient;
+    private final OrderKafkaProducer orderKafkaProducer;
 
     /**
      * 주문 추가 API
      */
     @Transactional
-    public String postOrder(Long memberId, PostOrderReqDTO postOrderReqDTO) {
+    public String postOrder(Long memberId, PostOrderReqDTO postOrderReqDTO) throws JsonProcessingException {
         // 주문 만들기
         Orders orders = postOrderReqDTO.toEntity(memberId, postOrderReqDTO.getTotal(), OrderStatus.PAYMENT);
         orderRepository.save(orders);
 
+        // 재고 줄이기 카프카 통신을 위해 저장
+        List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+
         // 주문 상품 만들기
         for (PostOrderProductReqDTO postOrderProductReqDTO : postOrderReqDTO.getOrderProducts()) {
-                OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, postOrderProductReqDTO);
-                orderProductRepository.save(orderProduct);
+            OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, postOrderProductReqDTO);
+            orderProductRepository.save(orderProduct);
 
-                // 재고 줄이기
-                //product.updateStock(product.getStock() - postOrderProductReqDTO.getCount());
+            // 재고 줄이기 카프카 통신을 위해 저장
+            stockHandleDTOS.add(StockHandleDTO.toDTO(postOrderProductReqDTO.getProductId(), postOrderProductReqDTO.getCount()));
         }
+
+        // 상품서비스로 전달
+        orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
 
         return "결제 준비가 완료되었습니다.";
     }

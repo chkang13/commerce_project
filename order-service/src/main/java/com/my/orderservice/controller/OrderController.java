@@ -1,5 +1,6 @@
 package com.my.orderservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.my.coreservice.global.common.BaseResponse;
 import com.my.orderservice.dto.Order.GetOrderResDTO;
 import com.my.orderservice.dto.Order.GetOrdersResDTO;
@@ -26,7 +27,7 @@ public class OrderController {
      * @return String
      */
     @PostMapping
-    private BaseResponse<String> postOrder(@RequestHeader Long memberId, @RequestBody PostOrderReqDTO postOrderReqDTO) {
+    private BaseResponse<String> postOrder(@RequestHeader Long memberId, @RequestBody PostOrderReqDTO postOrderReqDTO) throws JsonProcessingException {
         String postOrderRes = orderService.postOrder(memberId, postOrderReqDTO);
 
         return new BaseResponse<>(postOrderRes);

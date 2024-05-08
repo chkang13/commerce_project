@@ -92,12 +92,15 @@ project(':member-service') {
         implementation 'javax.mail:javax.mail-api:1.6.2'
 
         implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
     }
 }
 
 project(':product-service') {
     dependencies {
         implementation project(':core-service')
+
+        implementation 'org.springframework.kafka:spring-kafka'
     }
 }
 
@@ -111,5 +114,7 @@ project(':order-service') {
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
         implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
+        implementation 'org.springframework.kafka:spring-kafka'
     }
 }
