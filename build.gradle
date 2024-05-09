@@ -118,3 +118,9 @@ project(':order-service') {
         implementation 'org.springframework.kafka:spring-kafka'
     }
 }
+
+project(':stock-service') {
+    dependencies {
+        implementation project(':core-service')
+    }
+}
