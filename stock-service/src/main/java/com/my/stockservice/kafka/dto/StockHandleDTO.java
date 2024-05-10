@@ -1,6 +1,5 @@
-package com.my.productservice.kafka.dto;
+package com.my.stockservice.kafka.dto;
 
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter

@@ -1,9 +1,9 @@
-package com.my.productservice.kafka;
+package com.my.stockservice.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.my.productservice.kafka.dto.WriteStockMessage;
-import com.my.productservice.service.ProductService;
+import com.my.stockservice.kafka.dto.WriteStockMessage;
+import com.my.stockservice.service.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProductKafkaConsumer {
 
-    private final ProductService productService;
+    private final StockService stockService;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(topics = "test-topic", groupId = "product-transaction-result-group")

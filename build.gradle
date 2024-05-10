@@ -100,8 +100,6 @@ project(':product-service') {
     dependencies {
         implementation project(':core-service')
 
-        implementation 'org.springframework.kafka:spring-kafka'
-
         implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
         implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
@@ -127,5 +125,7 @@ project(':order-service') {
 project(':stock-service') {
     dependencies {
         implementation project(':core-service')
+
+        implementation 'org.springframework.kafka:spring-kafka'
     }
 }

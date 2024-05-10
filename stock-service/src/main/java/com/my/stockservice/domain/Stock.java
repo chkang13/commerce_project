@@ -26,4 +26,8 @@ public class Stock extends BaseEntity {
         this.stock = stock;
     }
 
+    public void update(int stock) {
+        this.stock = stock;
+    }
+
 }

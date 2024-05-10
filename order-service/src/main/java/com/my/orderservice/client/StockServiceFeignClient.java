@@ -1,6 +1,7 @@
 package com.my.orderservice.client;
 
 import com.my.orderservice.kafka.dto.StockHandleDTO;
+import com.my.orderservice.kafka.dto.StockHandleDTOS;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +14,8 @@ import java.util.List;
 @CircuitBreaker(name = "updateStock")
 public interface StockServiceFeignClient {
     @RequestMapping(method = RequestMethod.PATCH, value = "/stocks/down", consumes = "application/json")
-    String reduceStock(@RequestBody List<StockHandleDTO> stockHandleDTOS);
+    String reduceStock(@RequestBody StockHandleDTOS stockHandleDTOS);
 
     @RequestMapping(method = RequestMethod.PATCH, value = "/stocks/up", consumes = "application/json")
-    String increaseStock(@RequestBody List<StockHandleDTO> stockHandleDTOS);
+    String increaseStock(@RequestBody StockHandleDTOS stockHandleDTOS);
 }

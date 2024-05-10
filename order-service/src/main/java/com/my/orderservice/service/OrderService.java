@@ -10,6 +10,7 @@ import com.my.orderservice.dto.Order.*;
 import com.my.orderservice.dto.client.GetProductResDTO;
 import com.my.orderservice.kafka.OrderKafkaProducer;
 import com.my.orderservice.kafka.dto.StockHandleDTO;
+import com.my.orderservice.kafka.dto.StockHandleDTOS;
 import com.my.orderservice.repository.*;
 import com.my.orderservice.util.OrderStatus;
 import jakarta.transaction.Transactional;
@@ -49,7 +50,8 @@ public class OrderService {
         orderRepository.save(orders);
 
         // 재고 줄이기 통신을 위해 저장
-        List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+        StockHandleDTOS stockHandleDTOS;
+        List<StockHandleDTO> stockHandleDTOList = new ArrayList<>();
 
         // 주문 상품 만들기
         for (PostOrderProductReqDTO postOrderProductReqDTO : postOrderReqDTO.getOrderProducts()) {
@@ -57,12 +59,13 @@ public class OrderService {
             orderProductRepository.save(orderProduct);
 
             // 재고 줄이기 통신을 위해 저장
-            stockHandleDTOS.add(StockHandleDTO.toDTO(postOrderProductReqDTO.getProductId(), postOrderProductReqDTO.getCount()));
+            stockHandleDTOList.add(StockHandleDTO.toDTO(postOrderProductReqDTO.getProductId(), postOrderProductReqDTO.getCount()));
         }
 
         // 상품서비스로 전달
         //orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
 
+        stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
         // 재고 서비스로 전달
         stockServiceFeignClient.reduceStock(stockHandleDTOS);
 
@@ -80,7 +83,8 @@ public class OrderService {
 
         for (Orders order : orders) {
             // 재고 늘리기 통신을 위해 저장
-            List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+            StockHandleDTOS stockHandleDTOS;
+            List<StockHandleDTO> stockHandleDTOList = new ArrayList<>();
 
             LocalDateTime orderDateTime = order.getCreatedAt().toLocalDateTime();
 
@@ -91,11 +95,12 @@ public class OrderService {
 
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
 
-                    stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+                    stockHandleDTOList.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
 
                 }
 
                 // 재고 서비스로 전달
+                stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                 stockServiceFeignClient.increaseStock(stockHandleDTOS);
                 order.updateOrderStatus(OrderStatus.PAYBACK);
             }
@@ -119,15 +124,17 @@ public class OrderService {
                 }
                 else {
                     // 재고 늘리기 통신을 위해 저장
-                    List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+                    StockHandleDTOS stockHandleDTOS;
+                    List<StockHandleDTO> stockHandleDTOList = new ArrayList<>();
 
                     for (OrderProduct orderProduct : order.getOrderProducts()) {
 
-                        stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+                        stockHandleDTOList.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
 
                     }
 
                     // 재고 서비스로 전달
+                    stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                     stockServiceFeignClient.increaseStock(stockHandleDTOS);
 
                     throw new BaseException(ORDER_CANCELED_PAYMENT);
@@ -241,13 +248,15 @@ public class OrderService {
             // 배송중 이전까지만
             if (order.getStatus().equals(OrderStatus.ORDERED)) {
                 // 재고 늘리기 통신을 위해 저장
-                List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+                StockHandleDTOS stockHandleDTOS;
+                List<StockHandleDTO> stockHandleDTOList = new ArrayList<>();
 
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
-                    stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+                    stockHandleDTOList.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
 
                 }
                 // 재고 서비스로 전달
+                stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                 stockServiceFeignClient.increaseStock(stockHandleDTOS);
             }
             else {
@@ -300,13 +309,15 @@ public class OrderService {
         for (Orders order : orders) {
             if (order.getStatus().equals(OrderStatus.REFUND)) {
                 // 재고 늘리기 통신을 위해 저장
-                List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+                StockHandleDTOS stockHandleDTOS;
+                List<StockHandleDTO> stockHandleDTOList = new ArrayList<>();
 
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
-                    stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+                    stockHandleDTOList.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
 
                 }
                 // 재고 서비스로 전달
+                stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                 stockServiceFeignClient.increaseStock(stockHandleDTOS);
 
                 order.updateOrderStatus(OrderStatus.REFUNDED);
