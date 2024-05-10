@@ -14,11 +14,17 @@ public class ScheduleConfig {
     private final OrderService orderService;
 
     @Scheduled(cron = "0 0 0 * * ?") // 매일 자정에 실행 (초, 분, 시, 일, 월, 요일)
-    public void run() throws BasicException {
+    public void run1() throws BasicException {
         // 배송 상태 변경
         orderService.updateStatus();
 
         // 반품 처리
         orderService.updateRefund();
+    }
+
+    @Scheduled(cron = "0 */5 * * * *") // 매일 자정에 실행 (초, 분, 시, 일, 월, 요일)
+    public void run2() throws BasicException {
+        // 결제 상태 변경
+        orderService.updatePayment();
     }
 }

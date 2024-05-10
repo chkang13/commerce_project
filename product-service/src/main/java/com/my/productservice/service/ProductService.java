@@ -1,6 +1,7 @@
 package com.my.productservice.service;
 
 import com.my.coreservice.global.common.BaseException;
+import com.my.productservice.client.StockServiceFeignClient;
 import com.my.productservice.domain.Product;
 import com.my.productservice.dto.GetProductResDTO;
 import com.my.productservice.dto.PostProductReqDTO;
@@ -23,6 +24,7 @@ import static com.my.coreservice.global.common.BaseResponseStatus.PRODUCT_INVALI
 @Transactional
 public class ProductService {
     private final ProductRepository productRepository;
+    private final StockServiceFeignClient stockServiceFeignClient;
 
     /**
      * 상품 추가 API
@@ -31,6 +33,9 @@ public class ProductService {
     public String addProduct(PostProductReqDTO postProductReqDTO) {
         Product product = postProductReqDTO.toEntity(postProductReqDTO, 1);
         productRepository.save(product);
+
+        // 재고 서비스로 재고 추가 요청
+        stockServiceFeignClient.addStock(product.getId(), postProductReqDTO.getStock());
 
         return "상품 추가 성공하였습니다.";
     }
@@ -64,13 +69,13 @@ public class ProductService {
         }
     }
 
-    public void reduceStock(final WriteStockMessage writeStockMessage) {
-
-        for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS()) {
-            log.info(String.valueOf(stockHandleDTO.getProductId()));
-            Product product = productRepository.findById(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
-            product.updateStock(product.getStock() - stockHandleDTO.getCount());
-        }
-    }
+//    public void reduceStock(final WriteStockMessage writeStockMessage) {
+//
+//        for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS()) {
+//            log.info(String.valueOf(stockHandleDTO.getProductId()));
+//            Product product = productRepository.findById(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
+//            product.updateStock(product.getStock() - stockHandleDTO.getCount());
+//        }
+//    }
 
 }

@@ -17,11 +17,11 @@ public class ProductKafkaConsumer {
     private final ProductService productService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "write-order", groupId = "product-transaction-result-group")
+    @KafkaListener(topics = "test-topic", groupId = "product-transaction-result-group")
     public void consumeBoardWriteEvent(final String writeStockMessage) throws JsonProcessingException {
         final WriteStockMessage message = objectMapper.readValue(writeStockMessage, WriteStockMessage.class);
         log.info(writeStockMessage);
 
-        productService.reduceStock(message);
+       // productService.reduceStock(message);
     }
 }

@@ -3,6 +3,7 @@ package com.my.orderservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.my.coreservice.global.common.BaseException;
 import com.my.orderservice.client.ProductServiceFeignClient;
+import com.my.orderservice.client.StockServiceFeignClient;
 import com.my.orderservice.domain.OrderProduct;
 import com.my.orderservice.domain.Orders;
 import com.my.orderservice.dto.Order.*;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,7 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final WishProductRepository wishProductRepository;
     private final ProductServiceFeignClient productServiceFeignClient;
+    private final StockServiceFeignClient stockServiceFeignClient;
     private final OrderKafkaProducer orderKafkaProducer;
 
     /**
@@ -45,7 +48,7 @@ public class OrderService {
         Orders orders = postOrderReqDTO.toEntity(memberId, postOrderReqDTO.getTotal(), OrderStatus.PAYMENT);
         orderRepository.save(orders);
 
-        // 재고 줄이기 카프카 통신을 위해 저장
+        // 재고 줄이기 통신을 위해 저장
         List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
 
         // 주문 상품 만들기
@@ -53,15 +56,52 @@ public class OrderService {
             OrderProduct orderProduct = postOrderProductReqDTO.toEntity(orders, postOrderProductReqDTO);
             orderProductRepository.save(orderProduct);
 
-            // 재고 줄이기 카프카 통신을 위해 저장
+            // 재고 줄이기 통신을 위해 저장
             stockHandleDTOS.add(StockHandleDTO.toDTO(postOrderProductReqDTO.getProductId(), postOrderProductReqDTO.getCount()));
         }
 
         // 상품서비스로 전달
-        orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
+        //orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
+
+        // 재고 서비스로 전달
+        stockServiceFeignClient.reduceStock(stockHandleDTOS);
 
         return "결제 준비가 완료되었습니다.";
     }
+
+    /**
+     * 결제 상태 변경 API
+     */
+    @Transactional
+    public void updatePayment() {
+        List<Orders> orders = orderRepository.findAll();
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // 현재 시간
+        LocalDateTime currentDateTime = currentTime.toLocalDateTime();
+
+        for (Orders order : orders) {
+            // 재고 늘리기 통신을 위해 저장
+            List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+
+            LocalDateTime orderDateTime = order.getCreatedAt().toLocalDateTime();
+
+            // 날짜 차이
+            long minusBetween = ChronoUnit.MINUTES.between(currentDateTime, orderDateTime);
+
+            if (minusBetween >= 5) {
+
+                for (OrderProduct orderProduct : order.getOrderProducts()) {
+
+                    stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+
+                }
+
+                // 재고 서비스로 전달
+                stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                order.updateOrderStatus(OrderStatus.PAYBACK);
+            }
+        }
+    }
+
 
     /**
      * 주문 완성 API
@@ -78,12 +118,17 @@ public class OrderService {
                     order.updateOrderStatus(OrderStatus.ORDERED);
                 }
                 else {
+                    // 재고 늘리기 통신을 위해 저장
+                    List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
 
                     for (OrderProduct orderProduct : order.getOrderProducts()) {
 
-                        // 재고 늘리기
-                        //orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                        stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+
                     }
+
+                    // 재고 서비스로 전달
+                    stockServiceFeignClient.increaseStock(stockHandleDTOS);
 
                     throw new BaseException(ORDER_CANCELED_PAYMENT);
                 }
@@ -194,11 +239,16 @@ public class OrderService {
 
         if (order.getMemberId() == memberId) {
             // 배송중 이전까지만
-            if (order.getStatus().equals(OrderStatus.ORDERED) || order.getStatus().equals(OrderStatus.PAYMENT)) {
+            if (order.getStatus().equals(OrderStatus.ORDERED)) {
+                // 재고 늘리기 통신을 위해 저장
+                List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
-                    // 재고 늘리기
-                    //orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                    stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+
                 }
+                // 재고 서비스로 전달
+                stockServiceFeignClient.increaseStock(stockHandleDTOS);
             }
             else {
                 throw new BaseException(ORDER_INVALID_CANCEL);
@@ -249,10 +299,15 @@ public class OrderService {
 
         for (Orders order : orders) {
             if (order.getStatus().equals(OrderStatus.REFUND)) {
-                // 재고 늘리기
+                // 재고 늘리기 통신을 위해 저장
+                List<StockHandleDTO> stockHandleDTOS = new ArrayList<>();
+
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
-                    //orderProduct.getProduct().updateStock(orderProduct.getProduct().getStock() + orderProduct.getCount());
+                    stockHandleDTOS.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
+
                 }
+                // 재고 서비스로 전달
+                stockServiceFeignClient.increaseStock(stockHandleDTOS);
 
                 order.updateOrderStatus(OrderStatus.REFUNDED);
             }

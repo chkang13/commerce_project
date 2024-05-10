@@ -27,7 +27,6 @@ public class PostProductReqDTO {
                 .image(postProductReqDTO.getImage())
                 .price(postProductReqDTO.getPrice())
                 .status(status)
-                .stock(postProductReqDTO.getStock())
                 .build();
     }
 

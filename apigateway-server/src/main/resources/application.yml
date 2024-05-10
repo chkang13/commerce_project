@@ -94,6 +94,15 @@ spring:
             - RemoveRequestHeader=Cookie
             - RewritePath=/(?<segment>.*), /$\{segment}
 
+        - id: stock-service
+          uri: lb://STOCK-SERVICE
+          predicates:
+            - Path=/stocks/**
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/(?<segment>.*), /$\{segment}
+
+
 eureka:
   instance:
     prefer-ip-address: true

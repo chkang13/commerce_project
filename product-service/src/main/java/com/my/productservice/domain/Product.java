@@ -23,20 +23,14 @@ public class Product extends BaseEntity {
     private String image;
     private int price;
     private int status;
-    private int stock;
 
     @Builder
-    public Product(Long id, String title, String image, int price, int status, int stock) {
+    public Product(Long id, String title, String image, int price, int status) {
         this.id = id;
         this.title = title;
         this.image = image;
         this.price = price;
         this.status = status;
-        this.stock = stock;
-    }
-
-    public void updateStock(int stock) {
-        this.stock = stock;
     }
 
 }
