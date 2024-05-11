@@ -34,7 +34,7 @@ public class StockController {
      *
      * @return String
      */
-    @PatchMapping("/down")
+    @PostMapping("/down")
     public BaseResponse<String> reduceStock(@RequestBody StockHandleDTOS stockHandleDTOS) {
         String reduceStock = stockService.reduceStock(stockHandleDTOS);
 
@@ -46,7 +46,7 @@ public class StockController {
      *
      * @return String
      */
-    @PatchMapping("/up")
+    @PostMapping("/up")
     public BaseResponse<String> increaseStock(@RequestBody StockHandleDTOS stockHandleDTOS) {
         String increaseStock = stockService.increaseStock(stockHandleDTOS);
 

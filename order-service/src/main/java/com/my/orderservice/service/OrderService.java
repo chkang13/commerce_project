@@ -62,12 +62,15 @@ public class OrderService {
             stockHandleDTOList.add(StockHandleDTO.toDTO(postOrderProductReqDTO.getProductId(), postOrderProductReqDTO.getCount()));
         }
 
-        // 상품서비스로 전달
-        //orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
+
 
         stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
+
+        // 상품서비스로 전달
+        orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
+
         // 재고 서비스로 전달
-        stockServiceFeignClient.reduceStock(stockHandleDTOS);
+        //stockServiceFeignClient.reduceStock(stockHandleDTOS);
 
         return "결제 준비가 완료되었습니다.";
     }

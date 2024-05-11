@@ -22,6 +22,6 @@ public class ProductKafkaConsumer {
         final WriteStockMessage message = objectMapper.readValue(writeStockMessage, WriteStockMessage.class);
         log.info(writeStockMessage);
 
-       // productService.reduceStock(message);
+       stockService.reduceStock2(message);
     }
 }

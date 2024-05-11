@@ -5,6 +5,7 @@ import com.my.stockservice.domain.Stock;
 import com.my.stockservice.dto.PostStockReqDTO;
 import com.my.stockservice.kafka.dto.StockHandleDTO;
 import com.my.stockservice.kafka.dto.StockHandleDTOS;
+import com.my.stockservice.kafka.dto.WriteStockMessage;
 import com.my.stockservice.repository.StockRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,14 @@ public class StockService {
         }
 
         return "상품 재고가 증가되었습니다.";
+    }
+
+    public void reduceStock2(final WriteStockMessage writeStockMessage) {
+        for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS().getStockList()) {
+            log.info(String.valueOf(stockHandleDTO.getProductId()));
+            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));;
+            stock.update(stock.getStock() - stockHandleDTO.getCount());
+        }
     }
 
 }

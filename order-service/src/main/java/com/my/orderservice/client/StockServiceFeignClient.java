@@ -13,9 +13,9 @@ import java.util.List;
 @FeignClient(name = "stock-service", url = "http://localhost:8083")
 @CircuitBreaker(name = "updateStock")
 public interface StockServiceFeignClient {
-    @RequestMapping(method = RequestMethod.PATCH, value = "/stocks/down", consumes = "application/json")
+    @RequestMapping(method = RequestMethod.POST, value = "/stocks/down", consumes = "application/json")
     String reduceStock(@RequestBody StockHandleDTOS stockHandleDTOS);
 
-    @RequestMapping(method = RequestMethod.PATCH, value = "/stocks/up", consumes = "application/json")
+    @RequestMapping(method = RequestMethod.POST, value = "/stocks/up", consumes = "application/json")
     String increaseStock(@RequestBody StockHandleDTOS stockHandleDTOS);
 }

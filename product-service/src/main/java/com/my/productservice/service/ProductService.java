@@ -67,13 +67,5 @@ public class ProductService {
         }
     }
 
-//    public void reduceStock(final WriteStockMessage writeStockMessage) {
-//
-//        for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS()) {
-//            log.info(String.valueOf(stockHandleDTO.getProductId()));
-//            Product product = productRepository.findById(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(PRODUCT_INVALID_ID));
-//            product.updateStock(product.getStock() - stockHandleDTO.getCount());
-//        }
-//    }
 
 }
