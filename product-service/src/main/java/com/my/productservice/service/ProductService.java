@@ -5,8 +5,6 @@ import com.my.productservice.client.StockServiceFeignClient;
 import com.my.productservice.domain.Product;
 import com.my.productservice.dto.GetProductResDTO;
 import com.my.productservice.dto.PostProductReqDTO;
-import com.my.productservice.kafka.dto.StockHandleDTO;
-import com.my.productservice.kafka.dto.WriteStockMessage;
 import com.my.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

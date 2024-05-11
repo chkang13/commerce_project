@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderKafkaProducer {
 
-    private static final String WRITE_BOARD_TOPIC = "test-topic";
+    private static final String WRITE_BOARD_TOPIC = "test-topic2";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;

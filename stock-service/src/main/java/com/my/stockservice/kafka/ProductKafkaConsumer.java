@@ -17,7 +17,7 @@ public class ProductKafkaConsumer {
     private final StockService stockService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "test-topic", groupId = "product-transaction-result-group")
+    @KafkaListener(topics = "test-topic2", groupId = "product-transaction-result-group")
     public void consumeBoardWriteEvent(final String writeStockMessage) throws JsonProcessingException {
         final WriteStockMessage message = objectMapper.readValue(writeStockMessage, WriteStockMessage.class);
         log.info(writeStockMessage);
