@@ -1,4 +1,4 @@
-package com.my.memberservice.config;
+package com.my.stockservice.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

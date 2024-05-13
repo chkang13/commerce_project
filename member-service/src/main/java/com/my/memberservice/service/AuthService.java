@@ -13,6 +13,7 @@ import com.my.memberservice.security.TokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,7 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import static com.my.coreservice.global.common.BaseResponseStatus.*;
 
@@ -35,7 +38,7 @@ public class AuthService {
     private final OrderServiceFeignClient orderServiceFeignClient;
     private final TokenProvider tokenProvider;
     private final JavaMailSender javaMailSender;
-    private final RedisUtilService redisUtilService;
+    private final RedissonClient redissonClient;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
@@ -88,7 +91,7 @@ public class AuthService {
         javaMailSender.send(message);
 
         // Redis에 인증번호 저장 (3분)
-        redisUtilService.setData(postEmailReqDTO.getEmail(), authCode, 180000);
+        redissonClient.getBucket(postEmailReqDTO.getEmail()).set(authCode, 3, TimeUnit.MINUTES);
 
         return "인증 메일이 발송되었습니다.";
     }
@@ -111,8 +114,8 @@ public class AuthService {
      * 이메일 인증 코드 확인
      */
     public String authCodeCheck(PostEmailCheckReqDTO postEmailCheckReqDTO) {
-        if (redisUtilService.existData(postEmailCheckReqDTO.getEmail())) {
-            if (!redisUtilService.getData(postEmailCheckReqDTO.getEmail()).equals(postEmailCheckReqDTO.getAuthCode())) {
+        if (redissonClient.getKeys().countExists(postEmailCheckReqDTO.getEmail()) > 0) {
+            if (!redissonClient.getBucket(postEmailCheckReqDTO.getEmail()).get().equals(postEmailCheckReqDTO.getAuthCode())) {
                 throw new BaseException(INVALID_AUTH_CODE);
             } else {
                 return "이메일 인증 성공했습니다.";
@@ -129,7 +132,7 @@ public class AuthService {
     public String logout(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7);
         Long expiration = tokenProvider.getExpiredTime(token);
-        redisUtilService.setData(token, "logout", expiration);
+        redissonClient.getBucket(token).set("logout", Duration.ofMillis(expiration));
 
         return "로그아웃이 완료되었습니다.";
     }

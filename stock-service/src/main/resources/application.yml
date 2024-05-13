@@ -11,6 +11,11 @@ spring:
     password: 1234!!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  redis:
+    data:
+      host: localhost
+      port: 6380
+
   jpa:
     hibernate:
       ddl-auto: update

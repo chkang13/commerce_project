@@ -74,7 +74,7 @@ project(':member-service') {
     dependencies {
         implementation project(':core-service')
         // Redis
-        implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+        implementation 'org.redisson:redisson-spring-boot-starter:3.30.0'
 
         // Spring Security
         implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -127,5 +127,7 @@ project(':stock-service') {
         implementation project(':core-service')
 
         implementation 'org.springframework.kafka:spring-kafka'
+
+        implementation 'org.redisson:redisson-spring-boot-starter:3.30.0'
     }
 }

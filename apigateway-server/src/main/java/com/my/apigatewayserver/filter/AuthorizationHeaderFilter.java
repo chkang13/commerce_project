@@ -2,6 +2,7 @@ package com.my.apigatewayserver.filter;
 
 import com.my.apigatewayserver.Token.RedisUtilService;
 import com.my.apigatewayserver.Token.TokenValid;
+import org.redisson.api.RedissonClient;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -13,12 +14,12 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
-    private final RedisUtilService redisUtilService;
+    private final RedissonClient redissonClient;
     private final TokenValid tokenValid;
 
-    public AuthorizationHeaderFilter(RedisUtilService redisUtilService, TokenValid tokenValid) {
+    public AuthorizationHeaderFilter(RedissonClient redissonClient, TokenValid tokenValid) {
         super(Config.class);
-        this.redisUtilService = redisUtilService;
+        this.redissonClient = redissonClient;
         this.tokenValid = tokenValid;
     }
 
@@ -40,7 +41,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
             }
 
             // 레디스 블랙리스트 확인
-            if (redisUtilService.existData(token)) {
+            if (redissonClient.getKeys().countExists(token) > 0) {
                 return onError(exchange, "Logout Token", HttpStatus.UNAUTHORIZED);
             }
             else {
