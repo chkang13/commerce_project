@@ -11,6 +11,7 @@ import com.my.orderservice.dto.client.GetProductResDTO;
 import com.my.orderservice.kafka.OrderKafkaProducer;
 import com.my.orderservice.kafka.dto.StockHandleDTO;
 import com.my.orderservice.kafka.dto.StockHandleDTOS;
+import com.my.orderservice.kafka.dto.WriteOrderMessage;
 import com.my.orderservice.repository.*;
 import com.my.orderservice.util.OrderStatus;
 import jakarta.transaction.Transactional;
@@ -66,8 +67,8 @@ public class OrderService {
 
         stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
 
-        // 상품서비스로 전달
-        orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
+        // 재고 서비스로 전달
+        orderKafkaProducer.updateStock(stockHandleDTOS, orders.getId());
 
         // 재고 서비스로 전달
         //stockServiceFeignClient.reduceStock(stockHandleDTOS);
@@ -79,7 +80,7 @@ public class OrderService {
      * 결제 상태 변경 API
      */
     @Transactional
-    public void updatePayment() {
+    public void updatePayment() throws JsonProcessingException {
         List<Orders> orders = orderRepository.findAll();
         Timestamp currentTime = new Timestamp(System.currentTimeMillis()); // 현재 시간
         LocalDateTime currentDateTime = currentTime.toLocalDateTime();
@@ -104,10 +105,17 @@ public class OrderService {
 
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                // stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
                 order.updateOrderStatus(OrderStatus.PAYBACK);
             }
         }
+    }
+
+    @Transactional
+    public void deletePayment(final WriteOrderMessage writeOrderMessage) {
+        Orders order = orderRepository.findById(writeOrderMessage.orderId()).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
+        order.updateOrderStatus(OrderStatus.PAYBACK);
     }
 
 
@@ -115,7 +123,7 @@ public class OrderService {
      * 주문 완성 API
      */
     @Transactional
-    public String patchOrder (Long memberId, Long orderId) {
+    public String patchOrder (Long memberId, Long orderId) throws JsonProcessingException {
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
 
         if (order.getMemberId() == memberId) {
@@ -138,7 +146,8 @@ public class OrderService {
 
                     // 재고 서비스로 전달
                     stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                    stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                    //stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                    orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
 
                     throw new BaseException(ORDER_CANCELED_PAYMENT);
                 }
@@ -244,7 +253,7 @@ public class OrderService {
      * 주문 취소 API
      */
     @Transactional
-    public String cancelOrder (Long memberId, Long orderId) {
+    public String cancelOrder (Long memberId, Long orderId) throws JsonProcessingException {
         Orders order = orderRepository.findById(orderId).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
 
         if (order.getMemberId() == memberId) {
@@ -260,7 +269,9 @@ public class OrderService {
                 }
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                // stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
+
             }
             else {
                 throw new BaseException(ORDER_INVALID_CANCEL);
@@ -306,7 +317,7 @@ public class OrderService {
      * 주문 반품 처리 API
      */
     @Transactional
-    public void updateRefund() {
+    public void updateRefund() throws JsonProcessingException {
         List<Orders> orders = orderRepository.findAll();
 
         for (Orders order : orders) {
@@ -321,7 +332,8 @@ public class OrderService {
                 }
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                //stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
 
                 order.updateOrderStatus(OrderStatus.REFUNDED);
             }

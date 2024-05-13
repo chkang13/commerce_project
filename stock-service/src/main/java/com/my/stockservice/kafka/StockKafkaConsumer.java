@@ -12,16 +12,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ProductKafkaConsumer {
+public class StockKafkaConsumer {
 
     private final StockService stockService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "test-topic2", groupId = "product-transaction-result-group")
-    public void consumeBoardWriteEvent(final String writeStockMessage) throws JsonProcessingException {
+    @KafkaListener(topics = "test-topic2", groupId = "stock-transaction-result-group")
+    public void stockReduce(final String writeStockMessage) throws JsonProcessingException {
         final WriteStockMessage message = objectMapper.readValue(writeStockMessage, WriteStockMessage.class);
-        log.info(writeStockMessage);
+        // log.info(writeStockMessage);
 
        stockService.reduceStock2(message);
+    }
+
+    @KafkaListener(topics = "test-topic2", groupId = "stock-transaction-result-group2")
+    public void stockIncrease(final String writeStockMessage) throws JsonProcessingException {
+        final WriteStockMessage message = objectMapper.readValue(writeStockMessage, WriteStockMessage.class);
+        // log.info(writeStockMessage);
+
+        stockService.increaseStock2(message);
     }
 }

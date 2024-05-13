@@ -39,7 +39,7 @@ public class OrderController {
      * @param orderId 시도할 주문 아이디
      */
     @PatchMapping("/payment/{orderId}")
-    private BaseResponse<String> patchOrder (@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) {
+    private BaseResponse<String> patchOrder (@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) throws JsonProcessingException {
         String patchRes = orderService.patchOrder(memberId, orderId);
 
         return new BaseResponse<>(patchRes);
@@ -78,7 +78,7 @@ public class OrderController {
      * @param orderId 취소할 주문 아이디
      */
     @PatchMapping("/{orderId}")
-    private BaseResponse<String> cancelOrder (@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) {
+    private BaseResponse<String> cancelOrder (@RequestHeader Long memberId, @PathVariable("orderId") Long orderId) throws JsonProcessingException {
         String cancelRes = orderService.cancelOrder(memberId, orderId);
 
         return new BaseResponse<>(cancelRes);

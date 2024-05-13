@@ -1,6 +1,5 @@
 package com.my.apigatewayserver.filter;
 
-import com.my.apigatewayserver.Token.RedisUtilService;
 import com.my.apigatewayserver.Token.TokenValid;
 import org.redisson.api.RedissonClient;
 import org.springframework.cloud.gateway.filter.GatewayFilter;

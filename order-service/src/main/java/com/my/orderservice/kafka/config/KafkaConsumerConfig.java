@@ -17,13 +17,13 @@ import java.util.Map;
 public class KafkaConsumerConfig {
 
     private static final String KAFKA_BROKER_URL = "localhost:9092";
-    private static final String BOARD_TRANSACTION_RESULT_GROUP_ID = "order-transaction-result-group";
+    private static final String ORDER_TRANSACTION_RESULT_GROUP_ID = "order-transaction-result-group";
 
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> configs = new HashMap<>();
         configs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER_URL);
-        configs.put(ConsumerConfig.GROUP_ID_CONFIG, BOARD_TRANSACTION_RESULT_GROUP_ID);
+        configs.put(ConsumerConfig.GROUP_ID_CONFIG, ORDER_TRANSACTION_RESULT_GROUP_ID);
         configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
