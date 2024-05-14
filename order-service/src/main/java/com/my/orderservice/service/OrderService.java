@@ -68,7 +68,7 @@ public class OrderService {
         stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
 
         // 재고 서비스로 전달
-        orderKafkaProducer.updateStock(stockHandleDTOS, orders.getId());
+        orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
 
         // 재고 서비스로 전달
         //stockServiceFeignClient.reduceStock(stockHandleDTOS);
@@ -93,9 +93,11 @@ public class OrderService {
             LocalDateTime orderDateTime = order.getCreatedAt().toLocalDateTime();
 
             // 날짜 차이
-            long minusBetween = ChronoUnit.MINUTES.between(currentDateTime, orderDateTime);
+            long minusBetween = ChronoUnit.MINUTES.between(orderDateTime, currentDateTime);
+            log.info(String.valueOf(minusBetween));
 
-            if (minusBetween >= 5) {
+            if (minusBetween >= 5 && order.getStatus().equals(OrderStatus.PAYMENT)) {
+                log.info("결제 변경 수행");
 
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
 
@@ -105,9 +107,13 @@ public class OrderService {
 
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                // stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
+                stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                log.info("재고 증가 요청 보냄");
+
+                // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
                 order.updateOrderStatus(OrderStatus.PAYBACK);
+                log.info("주문 PAYBACK");
+
             }
         }
     }
@@ -116,6 +122,8 @@ public class OrderService {
     public void deletePayment(final WriteOrderMessage writeOrderMessage) {
         Orders order = orderRepository.findById(writeOrderMessage.orderId()).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
         order.updateOrderStatus(OrderStatus.PAYBACK);
+        log.info("주문 PAYBACK2");
+
     }
 
 
@@ -144,12 +152,15 @@ public class OrderService {
 
                     }
 
+                    order.updateOrderStatus(OrderStatus.PAYBACK);
+
                     // 재고 서비스로 전달
                     stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                    //stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                    orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
+                    stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                    // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
 
-                    throw new BaseException(ORDER_CANCELED_PAYMENT);
+                    return "결제 과정에 실패하였습니다.";
+
                 }
             }
             else {
@@ -269,8 +280,8 @@ public class OrderService {
                 }
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                // stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
+                stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
 
             }
             else {
@@ -332,8 +343,8 @@ public class OrderService {
                 }
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-                //stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                orderKafkaProducer.updateStock(stockHandleDTOS, order.getId());
+                stockServiceFeignClient.increaseStock(stockHandleDTOS);
+                // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
 
                 order.updateOrderStatus(OrderStatus.REFUNDED);
             }

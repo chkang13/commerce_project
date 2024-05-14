@@ -23,9 +23,11 @@ public class ScheduleConfig {
         orderService.updateRefund();
     }
 
-    @Scheduled(cron = "0 */1 * * * *") // 5 분마다 실행
+    @Scheduled(fixedRate = 300000) // 5 분마다 실행
     public void run2() throws BasicException, JsonProcessingException {
         // 결제 상태 변경
         orderService.updatePayment();
+        log.info("결제 상태 변경 요청 보냄");
+
     }
 }

@@ -17,19 +17,12 @@ public class StockKafkaConsumer {
     private final StockService stockService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "test-topic2", groupId = "stock-transaction-result-group")
+    @KafkaListener(topics = "stock-topics1", groupId = "stock-transaction-result-group")
     public void stockReduce(final String writeStockMessage) throws JsonProcessingException {
         final WriteStockMessage message = objectMapper.readValue(writeStockMessage, WriteStockMessage.class);
-        // log.info(writeStockMessage);
+        log.info("재고 감소 요청 받음");
 
-       stockService.reduceStock2(message);
-    }
 
-    @KafkaListener(topics = "test-topic2", groupId = "stock-transaction-result-group2")
-    public void stockIncrease(final String writeStockMessage) throws JsonProcessingException {
-        final WriteStockMessage message = objectMapper.readValue(writeStockMessage, WriteStockMessage.class);
-        // log.info(writeStockMessage);
-
-        stockService.increaseStock2(message);
+        stockService.reduceStock2(message);
     }
 }

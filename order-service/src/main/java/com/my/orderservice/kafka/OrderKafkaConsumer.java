@@ -17,10 +17,10 @@ public class OrderKafkaConsumer {
     private final OrderService orderService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "test-topic2", groupId = "order-transaction-result-group")
+    @KafkaListener(topics = "stock-topics2", groupId = "order-transaction-result-group")
     public void updateOrder(final String writeOrderMessage) throws JsonProcessingException {
         final WriteOrderMessage message = objectMapper.readValue(writeOrderMessage, WriteOrderMessage.class);
-        // log.info(writeStockMessage);
+        log.info("주문 PAYBACK 요청 받음");
 
        orderService.deletePayment(message);
     }

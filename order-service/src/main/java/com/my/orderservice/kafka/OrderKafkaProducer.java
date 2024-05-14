@@ -17,15 +17,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderKafkaProducer {
 
-    private static final String WRITE_STOCK_TOPIC = "test-topic2";
+    private static final String WRITE_STOCK_TOPIC = "stock-topics1";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public void updateStock(final StockHandleDTOS stockHandleDTOS, final Long orderId) throws JsonProcessingException {
+    public void reduceStock(final StockHandleDTOS stockHandleDTOS, final Long orderId) throws JsonProcessingException {
         final WriteStockMessage writeStockMessage = new WriteStockMessage(stockHandleDTOS, orderId);
         kafkaTemplate.send(WRITE_STOCK_TOPIC, objectMapper.writeValueAsString(writeStockMessage));
 
-        // log.info(String.valueOf(stockHandleDTOS.getStockList().get(0).getProductId()));
+        log.info("재고 감소 카프카 요청 보냄");
     }
 }

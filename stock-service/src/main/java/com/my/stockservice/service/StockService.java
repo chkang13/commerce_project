@@ -75,28 +75,22 @@ public class StockService {
      */
     @Transactional
     public void reduceStock2(final WriteStockMessage writeStockMessage) throws JsonProcessingException {
+        log.info("재고 감소 요청 수행");
+
         for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS().getStockList()) {
             // log.info(String.valueOf(stockHandleDTO.getProductId()));
             Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));;
 
             if (stock.getStock() - stockHandleDTO.getCount() < 0) {
+                log.info(String.valueOf(stock.getStock()));
+                log.info(String.valueOf(stock.getStock()));
+
                 stockKafkaProducer.updateOrder(writeStockMessage.orderId());
             }
             else {
                 stock.update(stock.getStock() - stockHandleDTO.getCount());
+                log.info("재고 감소됨");
             }
-        }
-    }
-
-    /**
-     * 재고 증가 kafka 통신
-     */
-    @Transactional
-    public void increaseStock2(final WriteStockMessage writeStockMessage) {
-        for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS().getStockList()) {
-            // log.info(String.valueOf(stockHandleDTO.getProductId()));
-            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));;
-            stock.update(stock.getStock() + stockHandleDTO.getCount());
         }
     }
 

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class StockKafkaProducer {
 
-    private static final String WRITE_ORDER_TOPIC = "test-topic2";
+    private static final String WRITE_ORDER_TOPIC = "stock-topics2";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper;
@@ -22,6 +22,6 @@ public class StockKafkaProducer {
         final WriteOrderMessage writeStockMessage = new WriteOrderMessage(orderId);
         kafkaTemplate.send(WRITE_ORDER_TOPIC, objectMapper.writeValueAsString(writeStockMessage));
 
-        // log.info(String.valueOf(stockHandleDTOS.getStockList().get(0).getProductId()));
+        log.info("주문 PAYBACK 요청보냄");
     }
 }

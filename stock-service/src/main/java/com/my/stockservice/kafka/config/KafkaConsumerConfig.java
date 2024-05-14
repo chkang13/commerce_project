@@ -19,14 +19,11 @@ public class KafkaConsumerConfig {
     private static final String KAFKA_BROKER_URL = "localhost:9092";
     private static final String STOCK_TRANSACTION_RESULT_GROUP_ID = "stock-transaction-result-group";
 
-    private static final String STOCK_TRANSACTION_RESULT_GROUP_ID_2 = "stock-transaction-result-group2";
-
     @Bean
     public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> configs = new HashMap<>();
         configs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_BROKER_URL);
         configs.put(ConsumerConfig.GROUP_ID_CONFIG, STOCK_TRANSACTION_RESULT_GROUP_ID);
-        configs.put("second.group.id", STOCK_TRANSACTION_RESULT_GROUP_ID_2);
         configs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         configs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
