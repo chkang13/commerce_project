@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.redisson.client.codec.IntegerCodec;
+
 
 import java.util.List;
 
@@ -37,7 +39,8 @@ public class StockService {
         Stock stock = PostStockReqDTO.toEntity(productId, count);
         stockRepository.save(stock);
 
-        redissonClient.getBucket(String.valueOf(productId)).set(count);
+        RBucket<Integer> bucket = redissonClient.getBucket(String.valueOf(productId), IntegerCodec.INSTANCE);
+        bucket.set(count);
 
         return "상품 재고가 추가되었습니다.";
     }
@@ -51,12 +54,7 @@ public class StockService {
         List<StockHandleDTO> stockHandleDTOList = stockHandleDTOS.getStockList();
 
         for (StockHandleDTO stockHandleDTO : stockHandleDTOList) {
-            //Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
-
-            //stock.update(stock.getStock() + stockHandleDTO.getCount());
             long count = redissonClient.getAtomicLong(String.valueOf(stockHandleDTO.getProductId())).addAndGet(stockHandleDTO.getCount());
-
-            System.out.println(count);
         }
 
         return "상품 재고가 증가되었습니다.";
@@ -68,14 +66,12 @@ public class StockService {
     @Transactional
     public void reduceStock2(final WriteStockMessage writeStockMessage) throws JsonProcessingException {
         for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS().getStockList()) {
-            //Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
+            RBucket<Integer> bucket = redissonClient.getBucket(String.valueOf(stockHandleDTO.getProductId()), IntegerCodec.INSTANCE);
 
-            RBucket<String> bucket = redissonClient.getBucket(String.valueOf(stockHandleDTO.getProductId()));
-            if (Integer.parseInt(bucket.get()) - stockHandleDTO.getCount() < 0) {
+            if (bucket.get() - stockHandleDTO.getCount() < 0) {
                 stockKafkaProducer.updateOrder(writeStockMessage.orderId());
             } else {
-                //stock.update(stock.getStock() - stockHandleDTO.getCount());
-                bucket.set(String.valueOf(Integer.parseInt(bucket.get()) - stockHandleDTO.getCount()));
+                bucket.set(bucket.get() - stockHandleDTO.getCount());
             }
         }
     }

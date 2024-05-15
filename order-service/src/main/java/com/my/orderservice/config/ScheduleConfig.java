@@ -27,7 +27,5 @@ public class ScheduleConfig {
     public void run2() throws BasicException, JsonProcessingException {
         // 결제 상태 변경
         orderService.updatePayment();
-        log.info("결제 상태 변경 요청 보냄");
-
     }
 }
