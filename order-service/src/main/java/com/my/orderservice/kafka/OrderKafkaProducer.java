@@ -25,7 +25,5 @@ public class OrderKafkaProducer {
     public void reduceStock(final StockHandleDTOS stockHandleDTOS, final Long orderId) throws JsonProcessingException {
         final WriteStockMessage writeStockMessage = new WriteStockMessage(stockHandleDTOS, orderId);
         kafkaTemplate.send(WRITE_STOCK_TOPIC, objectMapper.writeValueAsString(writeStockMessage));
-
-        log.info("재고 감소 카프카 요청 보냄");
     }
 }

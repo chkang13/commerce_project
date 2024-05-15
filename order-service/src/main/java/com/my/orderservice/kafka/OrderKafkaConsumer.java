@@ -20,9 +20,8 @@ public class OrderKafkaConsumer {
     @KafkaListener(topics = "stock-topics2", groupId = "order-transaction-result-group")
     public void updateOrder(final String writeOrderMessage) throws JsonProcessingException {
         final WriteOrderMessage message = objectMapper.readValue(writeOrderMessage, WriteOrderMessage.class);
-        log.info("주문 PAYBACK 요청 받음");
 
-       orderService.deletePayment(message);
+        orderService.deletePayment(message);
     }
 
 }

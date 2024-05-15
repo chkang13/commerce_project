@@ -12,12 +12,11 @@ import com.my.stockservice.repository.StockRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RLock;
+import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.my.coreservice.global.common.BaseResponseStatus.STOCK_INVALID_STOCK;
 
@@ -38,23 +37,11 @@ public class StockService {
         Stock stock = PostStockReqDTO.toEntity(productId, count);
         stockRepository.save(stock);
 
+        redissonClient.getBucket(String.valueOf(productId)).set(count);
+
         return "상품 재고가 추가되었습니다.";
     }
 
-    /**
-     * 재고 감소 feign API
-     */
-    @Transactional
-    public String reduceStock(StockHandleDTOS stockHandleDTOS) {
-        List<StockHandleDTO> stockHandleDTOList = stockHandleDTOS.getStockList();
-
-        for (StockHandleDTO stockHandleDTO : stockHandleDTOList) {
-            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
-            stock.update(stock.getStock() - stockHandleDTO.getCount());
-        }
-
-        return "상품 재고가 감소되었습니다.";
-    }
 
     /**
      * 재고 증가 feign API
@@ -64,9 +51,12 @@ public class StockService {
         List<StockHandleDTO> stockHandleDTOList = stockHandleDTOS.getStockList();
 
         for (StockHandleDTO stockHandleDTO : stockHandleDTOList) {
-            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
+            //Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
 
-            stock.update(stock.getStock() + stockHandleDTO.getCount());
+            //stock.update(stock.getStock() + stockHandleDTO.getCount());
+            long count = redissonClient.getAtomicLong(String.valueOf(stockHandleDTO.getProductId())).addAndGet(stockHandleDTO.getCount());
+
+            System.out.println(count);
         }
 
         return "상품 재고가 증가되었습니다.";
@@ -77,25 +67,20 @@ public class StockService {
      */
     @Transactional
     public void reduceStock2(final WriteStockMessage writeStockMessage) throws JsonProcessingException {
-        log.info("재고 감소 요청 수행");
-
         for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS().getStockList()) {
-            // log.info(String.valueOf(stockHandleDTO.getProductId()));
-            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
-            ;
+            //Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
 
-            if (stock.getStock() - stockHandleDTO.getCount() < 0) {
-                log.info(String.valueOf(stock.getStock()));
-                log.info(String.valueOf(stock.getStock()));
-
+            RBucket<String> bucket = redissonClient.getBucket(String.valueOf(stockHandleDTO.getProductId()));
+            if (Integer.parseInt(bucket.get()) - stockHandleDTO.getCount() < 0) {
                 stockKafkaProducer.updateOrder(writeStockMessage.orderId());
             } else {
-                stock.update(stock.getStock() - stockHandleDTO.getCount());
-                log.info("재고 감소됨");
+                //stock.update(stock.getStock() - stockHandleDTO.getCount());
+                bucket.set(String.valueOf(Integer.parseInt(bucket.get()) - stockHandleDTO.getCount()));
             }
         }
     }
 
+    // 테스트용
     @Transactional
     public void reduceStock4(final Long productId, final int count) {
         Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));

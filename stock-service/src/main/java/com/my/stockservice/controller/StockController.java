@@ -1,14 +1,11 @@
 package com.my.stockservice.controller;
 
 import com.my.coreservice.global.common.BaseResponse;
-import com.my.stockservice.kafka.dto.StockHandleDTO;
 import com.my.stockservice.kafka.dto.StockHandleDTOS;
 import com.my.stockservice.service.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,17 +26,6 @@ public class StockController {
         return new BaseResponse<>(addStockRes);
     }
 
-    /**
-     * 재고 감소 API
-     *
-     * @return String
-     */
-    @PostMapping("/down")
-    public BaseResponse<String> reduceStock(@RequestBody StockHandleDTOS stockHandleDTOS) {
-        String reduceStock = stockService.reduceStock(stockHandleDTOS);
-
-        return new BaseResponse<>(reduceStock);
-    }
 
     /**
      * 재고 증가 API

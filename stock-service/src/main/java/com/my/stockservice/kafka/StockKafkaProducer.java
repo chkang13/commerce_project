@@ -21,7 +21,5 @@ public class StockKafkaProducer {
     public void updateOrder(final Long orderId) throws JsonProcessingException {
         final WriteOrderMessage writeStockMessage = new WriteOrderMessage(orderId);
         kafkaTemplate.send(WRITE_ORDER_TOPIC, objectMapper.writeValueAsString(writeStockMessage));
-
-        log.info("주문 PAYBACK 요청보냄");
     }
 }

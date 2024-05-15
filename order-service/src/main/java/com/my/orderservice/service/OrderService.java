@@ -63,15 +63,9 @@ public class OrderService {
             stockHandleDTOList.add(StockHandleDTO.toDTO(postOrderProductReqDTO.getProductId(), postOrderProductReqDTO.getCount()));
         }
 
-
-
         stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
-
         // 재고 서비스로 전달
         orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
-
-        // 재고 서비스로 전달
-        //stockServiceFeignClient.reduceStock(stockHandleDTOS);
 
         return "결제 준비가 완료되었습니다.";
     }
@@ -97,33 +91,26 @@ public class OrderService {
             log.info(String.valueOf(minusBetween));
 
             if (minusBetween >= 5 && order.getStatus().equals(OrderStatus.PAYMENT)) {
-                log.info("결제 변경 수행");
-
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
-
                     stockHandleDTOList.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
-
                 }
 
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                 stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                log.info("재고 증가 요청 보냄");
 
-                // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
                 order.updateOrderStatus(OrderStatus.PAYBACK);
-                log.info("주문 PAYBACK");
-
             }
         }
     }
 
+    /**
+     * 결제중 상태 변경(재고 부족) API
+     */
     @Transactional
     public void deletePayment(final WriteOrderMessage writeOrderMessage) {
         Orders order = orderRepository.findById(writeOrderMessage.orderId()).orElseThrow(() -> new BaseException(ORDER_INVALID_ID));
         order.updateOrderStatus(OrderStatus.PAYBACK);
-        log.info("주문 PAYBACK2");
-
     }
 
 
@@ -149,7 +136,6 @@ public class OrderService {
                     for (OrderProduct orderProduct : order.getOrderProducts()) {
 
                         stockHandleDTOList.add(StockHandleDTO.toDTO(orderProduct.getProductId(), orderProduct.getCount()));
-
                     }
 
                     order.updateOrderStatus(OrderStatus.PAYBACK);
@@ -157,7 +143,6 @@ public class OrderService {
                     // 재고 서비스로 전달
                     stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                     stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                    // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
 
                     return "결제 과정에 실패하였습니다.";
 
@@ -281,8 +266,6 @@ public class OrderService {
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                 stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
-
             }
             else {
                 throw new BaseException(ORDER_INVALID_CANCEL);
@@ -344,7 +327,6 @@ public class OrderService {
                 // 재고 서비스로 전달
                 stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
                 stockServiceFeignClient.increaseStock(stockHandleDTOS);
-                // orderKafkaProducer.increaseStock(stockHandleDTOS, order.getId());
 
                 order.updateOrderStatus(OrderStatus.REFUNDED);
             }
