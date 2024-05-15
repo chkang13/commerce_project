@@ -12,17 +12,18 @@ import com.my.stockservice.repository.StockRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.my.coreservice.global.common.BaseResponseStatus.STOCK_INVALID_STOCK;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class StockService {
 
     private final StockRepository stockRepository;
@@ -34,7 +35,7 @@ public class StockService {
      */
     @Transactional
     public String addStock(Long productId, int count) {
-        Stock stock = PostStockReqDTO.toEntity(productId,count);
+        Stock stock = PostStockReqDTO.toEntity(productId, count);
         stockRepository.save(stock);
 
         return "상품 재고가 추가되었습니다.";
@@ -48,7 +49,7 @@ public class StockService {
         List<StockHandleDTO> stockHandleDTOList = stockHandleDTOS.getStockList();
 
         for (StockHandleDTO stockHandleDTO : stockHandleDTOList) {
-            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));;
+            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
             stock.update(stock.getStock() - stockHandleDTO.getCount());
         }
 
@@ -63,7 +64,8 @@ public class StockService {
         List<StockHandleDTO> stockHandleDTOList = stockHandleDTOS.getStockList();
 
         for (StockHandleDTO stockHandleDTO : stockHandleDTOList) {
-            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));;
+            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
+
             stock.update(stock.getStock() + stockHandleDTO.getCount());
         }
 
@@ -79,19 +81,31 @@ public class StockService {
 
         for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS().getStockList()) {
             // log.info(String.valueOf(stockHandleDTO.getProductId()));
-            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));;
+            Stock stock = stockRepository.findByProductId(stockHandleDTO.getProductId()).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
+            ;
 
             if (stock.getStock() - stockHandleDTO.getCount() < 0) {
                 log.info(String.valueOf(stock.getStock()));
                 log.info(String.valueOf(stock.getStock()));
 
                 stockKafkaProducer.updateOrder(writeStockMessage.orderId());
-            }
-            else {
+            } else {
                 stock.update(stock.getStock() - stockHandleDTO.getCount());
                 log.info("재고 감소됨");
             }
         }
     }
 
+    @Transactional
+    public void reduceStock4(final Long productId, final int count) {
+        Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
+
+        if (stock.getStock() - count < 0) {
+            throw new BaseException(STOCK_INVALID_STOCK);
+        } else {
+            stock.update(stock.getStock() - count);
+        }
+    }
 }
+
+

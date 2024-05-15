@@ -129,5 +129,7 @@ project(':stock-service') {
         implementation 'org.springframework.kafka:spring-kafka'
 
         implementation 'org.redisson:redisson-spring-boot-starter:3.30.0'
+
+        testImplementation 'org.projectlombok:lombok:1.18.22'
     }
 }
