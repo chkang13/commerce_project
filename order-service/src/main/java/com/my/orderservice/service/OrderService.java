@@ -88,7 +88,6 @@ public class OrderService {
 
             // 날짜 차이
             long minusBetween = ChronoUnit.MINUTES.between(orderDateTime, currentDateTime);
-            log.info(String.valueOf(minusBetween));
 
             if (minusBetween >= 5 && order.getStatus().equals(OrderStatus.PAYMENT)) {
                 for (OrderProduct orderProduct : order.getOrderProducts()) {
