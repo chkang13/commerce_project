@@ -20,6 +20,9 @@
 * Redis
 * Docker
 * Kafka
-## ERD, API
+## ERD
+![image](https://github.com/chkang13/commerce_project/assets/34392347/d3efbaa2-a321-4954-a67b-4f74ae230c25)
+## API 명세서
+https://documenter.getpostman.com/view/20766712/2sA3JT3e2t
 ## 아키텍쳐
 ## 트러블 슈팅
