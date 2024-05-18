@@ -18,7 +18,7 @@ MSA 구조로 구성하여 서비스의 확장성과 관리의 용이성을 고�
 ## 📄 API 명세서
 https://documenter.getpostman.com/view/20766712/2sA3JT3e2t
 ## 💻 아키텍쳐
-![commerce drawio](https://github.com/chkang13/commerce_project/assets/34392347/5b11c266-6833-42d0-922c-6251402a1934)
+![commerce drawio (1)](https://github.com/chkang13/commerce_project/assets/34392347/bac2ea41-a6f8-4768-a82b-30342c5a1fe7)
 ## 📈 트러블 슈팅
 * **재고 수량 동시성 문제 발생**
   
