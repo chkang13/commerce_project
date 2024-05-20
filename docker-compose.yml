@@ -48,6 +48,17 @@ services:
     depends_on:
       - zookeeper
 
+  controller:
+    image: ngrinder/controller
+    restart: always
+    ports:
+      - "9000:80"
+  agent:
+    image: ngrinder/agent
+    restart: always
+    links:
+      - controller
+
 volumes:
   com_data:
   redis_data:

@@ -66,7 +66,7 @@ public class StockService {
      * 재고 감소 kafka 통신
      */
     @Transactional
-    public void reduceStock2(final WriteStockMessage writeStockMessage) throws JsonProcessingException {
+    public void reduceStock(final WriteStockMessage writeStockMessage) throws JsonProcessingException {
         for (StockHandleDTO stockHandleDTO : writeStockMessage.stockHandleDTOS().getStockList()) {
             RBucket<Integer> bucket = redissonClient.getBucket("S:"+String.valueOf(stockHandleDTO.getProductId()), IntegerCodec.INSTANCE);
 
@@ -78,6 +78,9 @@ public class StockService {
         }
     }
 
+    /**
+     * 재고 DB에 반영
+     */
     @Transactional
     public void updateData() {
         RKeys keys = redissonClient.getKeys();
@@ -97,7 +100,7 @@ public class StockService {
 
     // 테스트용
     @Transactional
-    public void reduceStock4(final Long productId, final int count) {
+    public void reduceStock2(final Long productId, final int count) {
         Stock stock = stockRepository.findByProductId(productId).orElseThrow(() -> new BaseException(STOCK_INVALID_STOCK));
 
         if (stock.getStock() - count < 0) {
@@ -106,6 +109,24 @@ public class StockService {
             stock.update(stock.getStock() - count);
         }
     }
+
+    // 테스트용
+    /**
+     * 재고 감소 api
+     */
+    @Transactional
+    public void decreaseStock(StockHandleDTOS stockHandleDTOS) throws JsonProcessingException {
+        for (StockHandleDTO stockHandleDTO : stockHandleDTOS.getStockList()) {
+            RBucket<Integer> bucket = redissonClient.getBucket("S:"+String.valueOf(stockHandleDTO.getProductId()), IntegerCodec.INSTANCE);
+
+            if (bucket.get() - stockHandleDTO.getCount() < 0) {
+                throw new BaseException(STOCK_INVALID_STOCK);
+            } else {
+                bucket.set(bucket.get() - stockHandleDTO.getCount());
+            }
+        }
+    }
+
 }
 
 

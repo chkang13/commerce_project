@@ -38,7 +38,7 @@ public class StockServiceApplicationTests {
         for (int i = 0; i < 100; i++) {
             executorService.submit(() -> {
                 try {
-                    stockFacade.reduceStock3(1L, 1);
+                    stockFacade.reduceStock2(1L, 1);
                 } finally {
                     countDownLatch.countDown();
                 }

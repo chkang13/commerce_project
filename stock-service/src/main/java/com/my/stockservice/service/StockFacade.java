@@ -1,6 +1,7 @@
 package com.my.stockservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.my.stockservice.kafka.dto.StockHandleDTOS;
 import com.my.stockservice.kafka.dto.WriteStockMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +26,33 @@ public class StockFacade {
         RLock lock = redissonClient.getLock(String.format("order:%d", writeStockMessage.orderId()));
 
         try {
-            boolean available = lock.tryLock(10, 1, TimeUnit.SECONDS);
+            boolean available = lock.tryLock(5, 3, TimeUnit.SECONDS);
             if (!available) {
                 System.out.println("redisson getLock timeout");
                 return;
             }
 
-            stockService.reduceStock2(writeStockMessage);
+            stockService.reduceStock(writeStockMessage);
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } finally {
+            lock.unlock();
+         }
+
+    }
+
+    // 테스트용
+    public void reduceStock2(final Long productId, final int count) {
+        RLock lock = redissonClient.getLock(String.format("product:%d", productId));
+        try {
+            boolean available = lock.tryLock(5, 3, TimeUnit.SECONDS);
+            if (!available) {
+                System.out.println("redisson getLock timeout");
+                return;
+            }
+
+            stockService.reduceStock2(productId,count);
 
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -42,21 +63,25 @@ public class StockFacade {
     }
 
     // 테스트용
-    public void reduceStock3(final Long productId, final int count) {
-        RLock lock = redissonClient.getLock(String.format("product:%d", productId));
+    /**
+     * 재고 감소 api
+     */
+    public String decreaseStock(StockHandleDTOS stockHandleDTOS) throws JsonProcessingException {
+        RLock lock = redissonClient.getLock(String.format("product"));
         try {
-            boolean available = lock.tryLock(10, 1, TimeUnit.SECONDS);
+            boolean available = lock.tryLock(5, 3, TimeUnit.SECONDS);
             if (!available) {
                 System.out.println("redisson getLock timeout");
-                return;
+                return "q";
             }
 
-            stockService.reduceStock4(productId,count);
+            stockService.decreaseStock(stockHandleDTOS);
 
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
             lock.unlock();
+            return  "o";
         }
 
     }
