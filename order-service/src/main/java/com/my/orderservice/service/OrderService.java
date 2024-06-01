@@ -7,6 +7,8 @@ import com.my.orderservice.client.StockServiceFeignClient;
 import com.my.orderservice.domain.OrderProduct;
 import com.my.orderservice.domain.Orders;
 import com.my.orderservice.dto.Order.*;
+import com.my.orderservice.dto.Wish.PostOrderWIshProductReqDTO;
+import com.my.orderservice.dto.Wish.PostWishOrderReqDTO;
 import com.my.orderservice.dto.client.GetProductResDTO;
 import com.my.orderservice.kafka.OrderKafkaProducer;
 import com.my.orderservice.kafka.dto.StockHandleDTO;
@@ -61,6 +63,38 @@ public class OrderService {
 
             // 재고 줄이기 통신을 위해 저장
             stockHandleDTOList.add(StockHandleDTO.toDTO(postOrderProductReqDTO.getProductId(), postOrderProductReqDTO.getCount()));
+        }
+
+        stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
+        // 재고 서비스로 전달
+        orderKafkaProducer.reduceStock(stockHandleDTOS, orders.getId());
+
+        return "결제 준비가 완료되었습니다.";
+    }
+
+    /**
+     * 장바구니 주문 추가 API
+     */
+    @Transactional
+    public String postWishOrder(Long memberId, PostWishOrderReqDTO postWishOrderReqDTO) throws JsonProcessingException {
+        // 주문 만들기
+        Orders orders = postWishOrderReqDTO.toEntity(memberId, postWishOrderReqDTO.getTotal(), OrderStatus.PAYMENT);
+        orderRepository.save(orders);
+
+        // 재고 줄이기 통신을 위해 저장
+        StockHandleDTOS stockHandleDTOS;
+        List<StockHandleDTO> stockHandleDTOList = new ArrayList<>();
+
+        // 주문 상품 만들기
+        for (PostOrderWIshProductReqDTO postOrderWIshProductReqDTO : postWishOrderReqDTO.getOrderProducts()) {
+            OrderProduct orderProduct = postOrderWIshProductReqDTO.toEntity(orders, postOrderWIshProductReqDTO);
+            orderProductRepository.save(orderProduct);
+
+            // 재고 줄이기 통신을 위해 저장
+            stockHandleDTOList.add(StockHandleDTO.toDTO(postOrderWIshProductReqDTO.getProductId(), postOrderWIshProductReqDTO.getCount()));
+
+            // 장바구니 항목 삭제
+            wishProductRepository.deleteById(postOrderWIshProductReqDTO.getWishProductId());
         }
 
         stockHandleDTOS = StockHandleDTOS.toDTO(stockHandleDTOList);
@@ -157,30 +191,6 @@ public class OrderService {
 
         return "주문 완료 되었습니다.";
     }
-
-//    /**
-//     * 장바구니 주문 추가 API
-//     */
-//    @Transactional
-//    public String postWishOrder(Long memberId, PostWishOrderReqDTO postWishOrderReqDTO) {
-//        // 주문 만들기
-//        Orders orders = postWishOrderReqDTO.toEntity(memberId, postWishOrderReqDTO.getTotal(), OrderStatus.PAYMENT);
-//        orderRepository.save(orders);
-//
-//        // 주문 상품 만들기
-//        for (PostOrderWIshProductReqDTO postOrderWIshProductReqDTO : postWishOrderReqDTO.getOrderProducts()) {
-//            OrderProduct orderProduct = postOrderWIshProductReqDTO.toEntity(orders, postOrderWIshProductReqDTO);
-//            orderProductRepository.save(orderProduct);
-//
-//            // 장바구니 항목 삭제
-//            wishProductRepository.deleteById(postOrderWIshProductReqDTO.getWishProductId());
-//
-//            // 재고 줄이기
-//            //product.updateStock(product.getStock() - postOrderWIshProductReqDTO.getCount());
-//        }
-//
-//        return "주문이 완료되었습니다.";
-//    }
 
     /**
      * 주문 리스트 조회 API

@@ -1,5 +1,6 @@
 package com.my.orderservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.my.coreservice.global.common.BaseResponse;
 import com.my.orderservice.dto.Wish.GetWishProductResDTO;
 import com.my.orderservice.dto.Wish.PatchWishProductReqDTO;
@@ -77,18 +78,18 @@ public class WishController {
         return new BaseResponse<>(getWishProductResDTOS);
     }
 
-//    /**
-//     * 장바구니에서 주문 추가 API
-//     *
-//     * @param postWishOrderReqDTO 주문 정보
-//     * @return String
-//     */
-//    @PostMapping("/orders")
-//    private BaseResponse<String> postWishOrder(@RequestHeader Long memberId, @RequestBody PostWishOrderReqDTO postWishOrderReqDTO) {
-//        String postWishOrderRes = orderService.postWishOrder(memberId, postWishOrderReqDTO);
-//
-//        return new BaseResponse<>(postWishOrderRes);
-//    }
+    /**
+     * 장바구니에서 주문 추가 API
+     *
+     * @param postWishOrderReqDTO 주문 정보
+     * @return String
+     */
+    @PostMapping("/orders")
+    private BaseResponse<String> postWishOrder(@RequestHeader Long memberId, @RequestBody PostWishOrderReqDTO postWishOrderReqDTO) throws JsonProcessingException {
+        String postWishOrderRes = orderService.postWishOrder(memberId, postWishOrderReqDTO);
+
+        return new BaseResponse<>(postWishOrderRes);
+    }
 
 
 }
