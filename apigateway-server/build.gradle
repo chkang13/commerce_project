@@ -27,6 +27,7 @@ ext {
 
 dependencies {
     // Spring Cloud
+    // 의존성 재동기화 진행 (gradle -> refersh)
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
