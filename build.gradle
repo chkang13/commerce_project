@@ -133,3 +133,4 @@ project(':stock-service') {
         testImplementation 'org.projectlombok:lombok:1.18.22'
     }
 }
+//gradle update 2025.01.08
