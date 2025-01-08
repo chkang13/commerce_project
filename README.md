@@ -38,5 +38,3 @@ https://documenter.getpostman.com/view/20766712/2sA3JT3e2t
   * **문제 원인** : 동기 방식의 경우 서비스에 부하 및 속도 저하 우려
     
   * **해결 방법** : 메세지큐를 이용하여 비동기 방식으로 데이터 일관성 유지 및 성능 개선
-## 관련 링크
-**정리 블로그** : https://velog.io/@choon31/series/%EC%BB%A4%EB%A8%B8%EC%8A%A4-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8
